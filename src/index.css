@@ -1,0 +1,5 @@
+/* Global styles. Replaced by Tailwind in the next commit. */
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+}
