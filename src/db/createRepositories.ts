@@ -1,8 +1,9 @@
 import { InMemoryTaskRepository } from '@/features/tasks/data/inMemoryTaskRepository'
 import { type TaskRepository } from '@/features/tasks/data/taskRepository'
+import { taskModel } from '@/features/tasks/model'
 
 import { DiarioDatabase } from './database'
-import { DexieTaskRepository } from './dexieTaskRepository'
+import { DexieRepository } from './dexieRepository'
 
 export interface Repositories {
   tasks: TaskRepository
@@ -18,7 +19,7 @@ export async function createRepositories(): Promise<Repositories> {
   try {
     const db = new DiarioDatabase()
     await db.open()
-    return { tasks: new DexieTaskRepository(db), isPersistent: true }
+    return { tasks: new DexieRepository(db.tasks, taskModel), isPersistent: true }
   } catch (error) {
     console.warn('IndexedDB is not available, falling back to memory storage.', error)
     return { tasks: new InMemoryTaskRepository(), isPersistent: false }

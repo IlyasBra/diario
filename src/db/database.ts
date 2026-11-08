@@ -1,4 +1,4 @@
-import { Dexie, type EntityTable } from 'dexie'
+import { Dexie, type Table } from 'dexie'
 
 import { type Task } from '@/features/tasks/types'
 
@@ -13,7 +13,7 @@ export const DATABASE_NAME = 'diario'
  * function instead of editing an existing version.
  */
 export class DiarioDatabase extends Dexie {
-  declare tasks: EntityTable<Task, 'id'>
+  declare tasks: Table<Task, string>
 
   constructor(name: string = DATABASE_NAME) {
     super(name)

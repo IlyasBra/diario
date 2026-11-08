@@ -1,3 +1,4 @@
+import { type EntityModel } from '@/lib/data/repository'
 import { isISODate } from '@/lib/dates'
 
 import { type Task, type TaskChanges, type TaskInput } from './types'
@@ -32,6 +33,12 @@ export function applyTaskChanges(task: Task, changes: TaskChanges, now: Date): T
   }
 
   return next
+}
+
+/** Domain rules used by every TaskRepository implementation. */
+export const taskModel: EntityModel<Task, TaskInput, TaskChanges> = {
+  build: buildTask,
+  applyChanges: applyTaskChanges,
 }
 
 /** The editable fields of a task, e.g. to prefill the edit form. */

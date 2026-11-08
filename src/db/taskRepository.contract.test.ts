@@ -1,11 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { InMemoryTaskRepository } from '@/features/tasks/data/inMemoryTaskRepository'
-import { TaskNotFoundError, type TaskRepository } from '@/features/tasks/data/taskRepository'
+import { type TaskRepository } from '@/features/tasks/data/taskRepository'
+import { taskModel } from '@/features/tasks/model'
 import { type TaskInput } from '@/features/tasks/types'
+import { EntityNotFoundError } from '@/lib/data/repository'
 
 import { DiarioDatabase } from './database'
-import { DexieTaskRepository } from './dexieTaskRepository'
+import { DexieRepository } from './dexieRepository'
 
 const input: TaskInput = {
   title: 'Llamar al dentista',
@@ -21,10 +23,10 @@ const input: TaskInput = {
  */
 const implementations: [string, () => { repo: TaskRepository; cleanup: () => Promise<void> }][] = [
   [
-    'DexieTaskRepository',
+    'DexieRepository<Task>',
     () => {
       const db = new DiarioDatabase(`test-${crypto.randomUUID()}`)
-      return { repo: new DexieTaskRepository(db), cleanup: () => db.delete() }
+      return { repo: new DexieRepository(db.tasks, taskModel), cleanup: () => db.delete() }
     },
   ],
   [
@@ -67,7 +69,7 @@ describe.each(implementations)('%s', (_name, setup) => {
   })
 
   it('rejects updates to a missing task', async () => {
-    await expect(repo.update('missing', { title: 'x' })).rejects.toBeInstanceOf(TaskNotFoundError)
+    await expect(repo.update('missing', { title: 'x' })).rejects.toBeInstanceOf(EntityNotFoundError)
   })
 
   it('removes a task', async () => {
