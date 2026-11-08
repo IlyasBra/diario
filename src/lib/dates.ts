@@ -57,9 +57,19 @@ export function formatShortDate(value: ISODate): string {
   return format(parseISODate(value), 'd MMM', { locale: es })
 }
 
-/** "Hoy", "Mañana" or "lunes, 10 de noviembre" relative to `today`. */
+/**
+ * "Hoy", "Mañana" or "lunes, 10 de noviembre" relative to `today`; adds the
+ * year when it is not the current one ("miércoles, 20 de enero de 2027").
+ */
 export function formatDayHeading(value: ISODate, today: ISODate): string {
   if (value === today) return 'Hoy'
   if (value === addDaysToISODate(today, 1)) return 'Mañana'
-  return formatLongDate(parseISODate(value))
+  const date = parseISODate(value)
+  const label = formatLongDate(date)
+  return value.slice(0, 4) === today.slice(0, 4) ? label : `${label} de ${format(date, 'yyyy')}`
+}
+
+/** "09:05" for a Date, in 24h format. */
+export function formatTime(date: Date): string {
+  return format(date, 'HH:mm')
 }

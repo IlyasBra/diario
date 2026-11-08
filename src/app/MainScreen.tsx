@@ -7,6 +7,13 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import { PlusIcon } from '@/components/ui/icons'
 import { Notice } from '@/components/ui/Notice'
 import {
+  ReminderEditorDialog,
+  type ReminderEditorState,
+} from '@/features/reminders/components/ReminderEditorDialog'
+import { RemindersView } from '@/features/reminders/components/RemindersView'
+import { useReminders } from '@/features/reminders/state/useReminders'
+import { type Reminder } from '@/features/reminders/types'
+import {
   TaskEditorDialog,
   type TaskEditorState,
 } from '@/features/tasks/components/TaskEditorDialog'
@@ -17,7 +24,13 @@ import { type Task } from '@/features/tasks/types'
 import { useHashRoute } from '@/hooks/useHashRoute'
 import { addDaysToISODate, type ISODate } from '@/lib/dates'
 
-import { DEFAULT_ROUTE, NAV_ITEMS, ROUTES } from './routes'
+import { DEFAULT_ROUTE, NAV_ITEMS, type Route, ROUTES } from './routes'
+
+const CREATE_LABELS: Record<Route, string> = {
+  hoy: 'Nueva tarea',
+  proximos: 'Nueva tarea',
+  recordatorios: 'Nuevo recordatorio',
+}
 
 interface MainScreenProps {
   today: ISODate
@@ -26,20 +39,34 @@ interface MainScreenProps {
 
 export function MainScreen({ today, isPersistent }: MainScreenProps) {
   const route = useHashRoute(ROUTES, DEFAULT_ROUTE)
-  const { status, error, dismissError } = useTasks()
-  const [editor, setEditor] = useState<TaskEditorState | null>(null)
+  const tasks = useTasks()
+  const reminders = useReminders()
+  const [taskEditor, setTaskEditor] = useState<TaskEditorState | null>(null)
+  const [reminderEditor, setReminderEditor] = useState<ReminderEditorState | null>(null)
 
   useScrollToTopOnRouteChange(route)
 
-  // New tasks default to the day the user is looking at.
+  const status =
+    tasks.status === 'error' || reminders.status === 'error'
+      ? 'error'
+      : tasks.status === 'ready' && reminders.status === 'ready'
+        ? 'ready'
+        : 'loading'
+
+  // New items default to the day the user is looking at.
   const openCreate = useCallback(() => {
-    setEditor({ mode: 'create', date: route === 'hoy' ? today : addDaysToISODate(today, 1) })
+    if (route === 'recordatorios') setReminderEditor({ mode: 'create', date: today })
+    else
+      setTaskEditor({
+        mode: 'create',
+        date: route === 'hoy' ? today : addDaysToISODate(today, 1),
+      })
   }, [route, today])
-  const openEdit = useCallback((task: Task) => {
-    setEditor({ mode: 'edit', task })
+  const editTask = useCallback((task: Task) => {
+    setTaskEditor({ mode: 'edit', task })
   }, [])
-  const closeEditor = useCallback(() => {
-    setEditor(null)
+  const editReminder = useCallback((reminder: Reminder) => {
+    setReminderEditor({ mode: 'edit', reminder })
   }, [])
 
   return (
@@ -47,12 +74,17 @@ export function MainScreen({ today, isPersistent }: MainScreenProps) {
       <div className="mb-6 space-y-3 empty:hidden">
         {!isPersistent && (
           <Notice tone="warning">
-            Este navegador no permite guardar datos: las tareas se perderán al cerrar la app.
+            Este navegador no permite guardar datos: lo que apuntes se perderá al cerrar la app.
           </Notice>
         )}
-        {error && (
-          <Notice tone="error" onDismiss={dismissError}>
-            {error} Inténtalo de nuevo.
+        {tasks.error && (
+          <Notice tone="error" onDismiss={tasks.dismissError}>
+            {tasks.error} Inténtalo de nuevo.
+          </Notice>
+        )}
+        {reminders.error && (
+          <Notice tone="error" onDismiss={reminders.dismissError}>
+            {reminders.error} Inténtalo de nuevo.
           </Notice>
         )}
       </div>
@@ -60,29 +92,44 @@ export function MainScreen({ today, isPersistent }: MainScreenProps) {
       {status === 'loading' && <p className="text-slate-600 dark:text-slate-400">Cargando…</p>}
       {status === 'error' && (
         <EmptyState
-          title="No se han podido cargar tus tareas"
+          title="No se han podido cargar tus datos"
           description="Recarga la página. Si el problema sigue, revisa el espacio libre del dispositivo."
         />
       )}
-      {status === 'ready' &&
-        (route === 'hoy' ? (
-          <TodayView today={today} onCreate={openCreate} onEdit={openEdit} />
-        ) : (
-          <UpcomingView today={today} onCreate={openCreate} onEdit={openEdit} />
-        ))}
-
       {status === 'ready' && (
-        <Button
-          variant="primary"
-          onClick={openCreate}
-          className="fixed right-4 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-20 h-14 rounded-full pr-5 pl-4 shadow-lg md:bottom-8"
-        >
-          <PlusIcon />
-          Nueva tarea
-        </Button>
+        <>
+          {route === 'hoy' && <TodayView today={today} onCreate={openCreate} onEdit={editTask} />}
+          {route === 'proximos' && (
+            <UpcomingView today={today} onCreate={openCreate} onEdit={editTask} />
+          )}
+          {route === 'recordatorios' && (
+            <RemindersView onCreate={openCreate} onEdit={editReminder} />
+          )}
+
+          <Button
+            variant="primary"
+            onClick={openCreate}
+            className="fixed right-4 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-20 h-14 rounded-full pr-5 pl-4 shadow-lg md:bottom-8"
+          >
+            <PlusIcon />
+            {CREATE_LABELS[route]}
+          </Button>
+        </>
       )}
 
-      <TaskEditorDialog state={editor} today={today} onClose={closeEditor} />
+      <TaskEditorDialog
+        state={taskEditor}
+        today={today}
+        onClose={() => {
+          setTaskEditor(null)
+        }}
+      />
+      <ReminderEditorDialog
+        state={reminderEditor}
+        onClose={() => {
+          setReminderEditor(null)
+        }}
+      />
     </AppShell>
   )
 }

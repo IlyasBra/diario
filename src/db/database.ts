@@ -1,5 +1,6 @@
 import { Dexie, type Table } from 'dexie'
 
+import { type Reminder } from '@/features/reminders/types'
 import { type Task } from '@/features/tasks/types'
 
 export const DATABASE_NAME = 'diario'
@@ -14,6 +15,7 @@ export const DATABASE_NAME = 'diario'
  */
 export class DiarioDatabase extends Dexie {
   declare tasks: Table<Task, string>
+  declare reminders: Table<Reminder, string>
 
   constructor(name: string = DATABASE_NAME) {
     super(name)
@@ -35,5 +37,11 @@ export class DiarioDatabase extends Dexie {
             task.time ??= null
           }),
       )
+
+    // v3: reminders with a date, a time and an optional repeat.
+    this.version(3).stores({
+      tasks: 'id, date, updatedAt',
+      reminders: 'id, date',
+    })
   }
 }

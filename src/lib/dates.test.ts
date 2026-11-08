@@ -46,5 +46,6 @@ describe('dates', () => {
     expect(formatDayHeading('2026-11-09', '2026-11-08')).toBe('Mañana')
     expect(formatDayHeading('2026-11-10', '2026-11-08')).toBe('martes, 10 de noviembre')
     expect(formatShortDate('2026-11-05')).toBe('5 nov')
+    expect(formatDayHeading('2027-01-20', '2026-11-08')).toBe('miércoles, 20 de enero de 2027')
   })
 })

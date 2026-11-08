@@ -2,6 +2,7 @@ import { Suspense, use } from 'react'
 
 import { AppShell } from '@/components/layout/AppShell'
 import { getRepositories } from '@/db/getRepositories'
+import { RemindersProvider } from '@/features/reminders/state/RemindersProvider'
 import { TasksProvider } from '@/features/tasks/state/TasksProvider'
 import { useToday } from '@/hooks/useToday'
 import { type ISODate } from '@/lib/dates'
@@ -30,7 +31,9 @@ function DataLayer({ today }: { today: ISODate }) {
 
   return (
     <TasksProvider repository={repositories.tasks}>
-      <MainScreen today={today} isPersistent={repositories.isPersistent} />
+      <RemindersProvider repository={repositories.reminders}>
+        <MainScreen today={today} isPersistent={repositories.isPersistent} />
+      </RemindersProvider>
     </TasksProvider>
   )
 }

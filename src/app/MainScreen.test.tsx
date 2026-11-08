@@ -2,6 +2,8 @@ import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { InMemoryReminderRepository } from '@/features/reminders/data/inMemoryReminderRepository'
+import { RemindersProvider } from '@/features/reminders/state/RemindersProvider'
 import { InMemoryTaskRepository } from '@/features/tasks/data/inMemoryTaskRepository'
 import { TasksProvider } from '@/features/tasks/state/TasksProvider'
 import { type Task } from '@/features/tasks/types'
@@ -15,7 +17,9 @@ function renderApp(initialTasks: Task[] = []) {
   const repository = new InMemoryTaskRepository(initialTasks)
   render(
     <TasksProvider repository={repository}>
-      <MainScreen today={TODAY} isPersistent />
+      <RemindersProvider repository={new InMemoryReminderRepository()}>
+        <MainScreen today={TODAY} isPersistent />
+      </RemindersProvider>
     </TasksProvider>,
   )
   return { repository, user: userEvent.setup() }
@@ -72,7 +76,9 @@ describe('MainScreen', () => {
     vi.spyOn(console, 'error').mockImplementation(() => undefined)
     render(
       <TasksProvider repository={new FailingRepository([makeTask({ title: 'Leer', date: TODAY })])}>
-        <MainScreen today={TODAY} isPersistent />
+        <RemindersProvider repository={new InMemoryReminderRepository()}>
+          <MainScreen today={TODAY} isPersistent />
+        </RemindersProvider>
       </TasksProvider>,
     )
 
