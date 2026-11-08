@@ -6,6 +6,9 @@ import { Button } from '@/components/ui/Button'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { PlusIcon } from '@/components/ui/icons'
 import { Notice } from '@/components/ui/Notice'
+import { InAppAlerts } from '@/features/notifications/components/InAppAlerts'
+import { NotificationPrompt } from '@/features/notifications/components/NotificationPrompt'
+import { useAlertScheduler } from '@/features/notifications/useAlertScheduler'
 import {
   ReminderEditorDialog,
   type ReminderEditorState,
@@ -52,6 +55,12 @@ export function MainScreen({ today, isPersistent }: MainScreenProps) {
       : tasks.status === 'ready' && reminders.status === 'ready'
         ? 'ready'
         : 'loading'
+
+  const { inAppAlerts, dismissAlert } = useAlertScheduler(
+    reminders.reminders,
+    tasks.tasks,
+    status === 'ready',
+  )
 
   // New items default to the day the user is looking at.
   const openCreate = useCallback(() => {
@@ -103,7 +112,11 @@ export function MainScreen({ today, isPersistent }: MainScreenProps) {
             <UpcomingView today={today} onCreate={openCreate} onEdit={editTask} />
           )}
           {route === 'recordatorios' && (
-            <RemindersView onCreate={openCreate} onEdit={editReminder} />
+            <RemindersView
+              onCreate={openCreate}
+              onEdit={editReminder}
+              banner={<NotificationPrompt />}
+            />
           )}
 
           <Button
@@ -116,6 +129,8 @@ export function MainScreen({ today, isPersistent }: MainScreenProps) {
           </Button>
         </>
       )}
+
+      <InAppAlerts alerts={inAppAlerts} onDismiss={dismissAlert} />
 
       <TaskEditorDialog
         state={taskEditor}
