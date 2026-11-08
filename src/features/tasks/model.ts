@@ -34,6 +34,12 @@ export function applyTaskChanges(task: Task, changes: TaskChanges, now: Date): T
   return next
 }
 
+/** The editable fields of a task, e.g. to prefill the edit form. */
+export function toTaskInput(task: Task): TaskInput {
+  const { title, note, date, priority, tag } = task
+  return { title, note, date, priority, tag }
+}
+
 function normalizeInput(input: TaskInput): TaskInput {
   return {
     title: input.title.trim(),
