@@ -1,7 +1,7 @@
-import { formatLongDate, toISODate } from '@/lib/dates'
+import { formatLongDate, type ISODate, parseISODate } from '@/lib/dates'
 
 interface AppHeaderProps {
-  today: Date
+  today: ISODate
 }
 
 export function AppHeader({ today }: AppHeaderProps) {
@@ -10,7 +10,7 @@ export function AppHeader({ today }: AppHeaderProps) {
       <div className="mx-auto flex max-w-2xl items-baseline justify-between gap-4 px-4 py-4">
         <p className="text-xl font-semibold tracking-tight">Diario</p>
         <p className="text-sm text-slate-600 first-letter:uppercase dark:text-slate-400">
-          <time dateTime={toISODate(today)}>{formatLongDate(today)}</time>
+          <time dateTime={today}>{formatLongDate(parseISODate(today))}</time>
         </p>
       </div>
     </header>

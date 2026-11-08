@@ -1,15 +1,36 @@
+import { Suspense, use } from 'react'
+
 import { AppShell } from '@/components/layout/AppShell'
+import { getRepositories } from '@/db/getRepositories'
+import { TasksProvider } from '@/features/tasks/state/TasksProvider'
+import { useToday } from '@/hooks/useToday'
+import { type ISODate } from '@/lib/dates'
+
+import { MainScreen } from './MainScreen'
 
 export function App() {
+  const today = useToday()
+
   return (
-    <AppShell>
-      <h1 className="text-2xl font-semibold tracking-tight">Hoy</h1>
-      <section
-        aria-label="Tareas de hoy"
-        className="mt-4 rounded-xl border border-dashed border-slate-300 p-8 text-center text-slate-600 dark:border-slate-700 dark:text-slate-400"
-      >
-        <p>Aquí aparecerán tus tareas del día.</p>
-      </section>
-    </AppShell>
+    <Suspense
+      fallback={
+        <AppShell today={today}>
+          <p className="text-slate-600 dark:text-slate-400">Cargando…</p>
+        </AppShell>
+      }
+    >
+      <DataLayer today={today} />
+    </Suspense>
+  )
+}
+
+/** Waits for the database to open (suspending meanwhile) and provides data. */
+function DataLayer({ today }: { today: ISODate }) {
+  const repositories = use(getRepositories())
+
+  return (
+    <TasksProvider repository={repositories.tasks}>
+      <MainScreen today={today} isPersistent={repositories.isPersistent} />
+    </TasksProvider>
   )
 }
