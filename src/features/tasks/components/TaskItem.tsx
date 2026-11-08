@@ -2,7 +2,7 @@ import { useId } from 'react'
 
 import { Badge, type BadgeTone } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
-import { ArrowRightIcon, PencilIcon } from '@/components/ui/icons'
+import { ArrowRightIcon, ClockIcon, PencilIcon } from '@/components/ui/icons'
 import { cn } from '@/lib/cn'
 import { formatShortDate, type ISODate } from '@/lib/dates'
 
@@ -64,6 +64,13 @@ export function TaskItem({ task, today, onToggle, onPostpone, onEdit }: TaskItem
             </p>
           )}
           <div className="mt-1.5 flex flex-wrap gap-1.5">
+            {task.time && (
+              <Badge>
+                <ClockIcon className="mr-1 size-3.5" />
+                <span className="sr-only">A las </span>
+                <time className="tabular-nums">{task.time}</time>
+              </Badge>
+            )}
             {overdue && <Badge tone="danger">Atrasada · {formatShortDate(task.date)}</Badge>}
             <Badge tone={PRIORITY_TONES[task.priority]}>
               <span className="sr-only">Prioridad </span>

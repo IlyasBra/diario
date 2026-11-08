@@ -9,9 +9,17 @@ export function isOverdue(task: Task, today: ISODate): boolean {
   return !task.completed && task.date < today
 }
 
-/** Pending first, then by priority, then oldest first. */
+/**
+ * Pending first; then tasks with a time, earliest first; then by priority;
+ * then oldest first.
+ */
 export function compareTasks(a: Task, b: Task): number {
   if (a.completed !== b.completed) return a.completed ? 1 : -1
+  if (a.time !== b.time) {
+    if (a.time === null) return 1
+    if (b.time === null) return -1
+    return a.time.localeCompare(b.time)
+  }
   const byPriority = PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]
   if (byPriority !== 0) return byPriority
   return a.createdAt.localeCompare(b.createdAt)

@@ -10,6 +10,9 @@ import { es } from 'date-fns/locale'
  */
 export type ISODate = string
 
+/** A time of day as "HH:mm" (24h), the format of <input type="time">. */
+export type TimeString = string
+
 const ISO_DATE_FORMAT = 'yyyy-MM-dd'
 
 /** Local calendar date as "yyyy-MM-dd" (no UTC shift, unlike toISOString). */
@@ -26,6 +29,18 @@ export function parseISODate(value: ISODate): Date {
 
 export function isISODate(value: string): value is ISODate {
   return /^\d{4}-\d{2}-\d{2}$/.test(value) && isValid(parse(value, ISO_DATE_FORMAT, new Date()))
+}
+
+export function isTimeString(value: string): value is TimeString {
+  return /^([01]\d|2[0-3]):[0-5]\d$/.test(value)
+}
+
+/** Local Date for a calendar day at a given time. */
+export function combineDateAndTime(date: ISODate, time: TimeString): Date {
+  const [hours = 0, minutes = 0] = time.split(':').map(Number)
+  const result = parseISODate(date)
+  result.setHours(hours, minutes, 0, 0)
+  return result
 }
 
 export function addDaysToISODate(value: ISODate, amount: number): ISODate {

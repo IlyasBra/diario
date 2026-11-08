@@ -4,7 +4,9 @@ import {
   addDaysToISODate,
   formatDayHeading,
   formatShortDate,
+  combineDateAndTime,
   isISODate,
+  isTimeString,
   parseISODate,
   toISODate,
 } from './dates'
@@ -24,6 +26,13 @@ describe('dates', () => {
     expect(isISODate('08/11/2026')).toBe(false)
     expect(isISODate('2026-11-08')).toBe(true)
     expect(() => parseISODate('nope')).toThrow()
+  })
+
+  it('validates and combines times of day', () => {
+    expect(isTimeString('09:05')).toBe(true)
+    expect(isTimeString('9:05')).toBe(false)
+    expect(isTimeString('24:00')).toBe(false)
+    expect(combineDateAndTime('2026-11-08', '18:45')).toEqual(new Date(2026, 10, 8, 18, 45))
   })
 
   it('adds days across month and year boundaries', () => {

@@ -59,6 +59,7 @@ function TaskEditorContent({ state, today, onClose }: TaskEditorContentProps) {
       title: '',
       note: '',
       date: state.date,
+      time: null,
       priority: 'medium',
       tag: 'personal',
     }

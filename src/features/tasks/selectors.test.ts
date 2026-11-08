@@ -35,6 +35,18 @@ describe('selectTodayTasks', () => {
     expect(selectTodayTasks([yesterday, lastWeek], TODAY).overdue).toEqual([lastWeek, yesterday])
   })
 
+  it('puts timed tasks first, earliest first, before untimed ones', () => {
+    const untimedHigh = makeTask({ date: TODAY, priority: 'high' })
+    const late = makeTask({ date: TODAY, time: '18:00', priority: 'low' })
+    const early = makeTask({ date: TODAY, time: '09:30', priority: 'low' })
+
+    expect(selectTodayTasks([untimedHigh, late, early], TODAY).today).toEqual([
+      early,
+      late,
+      untimedHigh,
+    ])
+  })
+
   it('puts pending tasks first, then sorts by priority', () => {
     const done = makeTask({ date: TODAY, priority: 'high', completed: true })
     const low = makeTask({ date: TODAY, priority: 'low' })

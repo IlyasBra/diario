@@ -37,12 +37,15 @@ export function TaskForm({
   const [isSaving, setIsSaving] = useState(false)
   const titleRef = useRef<HTMLInputElement>(null)
   const dateRef = useRef<HTMLInputElement>(null)
+  const timeRef = useRef<HTMLInputElement>(null)
   const ids = {
     title: useId(),
     titleError: useId(),
     note: useId(),
     date: useId(),
     dateError: useId(),
+    time: useId(),
+    timeError: useId(),
     tag: useId(),
   }
 
@@ -57,10 +60,11 @@ export function TaskForm({
     event.preventDefault()
     const validation = validateTaskInput(values)
 
-    if (validation.title ?? validation.date) {
+    if (validation.title ?? validation.date ?? validation.time) {
       setShowErrors(true)
       // Move focus to the first invalid field so screen readers announce it.
-      ;(validation.title ? titleRef : dateRef).current?.focus()
+      const firstInvalid = validation.title ? titleRef : validation.date ? dateRef : timeRef
+      firstInvalid.current?.focus()
       return
     }
 
@@ -144,6 +148,32 @@ export function TaskForm({
           >
             Mañana
           </Button>
+        </div>
+      </Field>
+
+      <Field label="Hora (opcional)" htmlFor={ids.time} errorId={ids.timeError} error={errors.time}>
+        <div className="flex gap-2">
+          <input
+            ref={timeRef}
+            id={ids.time}
+            type="time"
+            value={values.time ?? ''}
+            onChange={(event) => {
+              update('time', event.target.value === '' ? null : event.target.value)
+            }}
+            aria-invalid={errors.time ? true : undefined}
+            aria-describedby={errors.time ? ids.timeError : undefined}
+            className={`${inputClassName} min-w-0 flex-1`}
+          />
+          {values.time !== null && (
+            <Button
+              onClick={() => {
+                update('time', null)
+              }}
+            >
+              Sin hora
+            </Button>
+          )}
         </div>
       </Field>
 

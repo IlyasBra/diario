@@ -12,6 +12,7 @@ const input: TaskInput = {
   title: '  Comprar pan  ',
   note: '',
   date: '2026-11-08',
+  time: null,
   priority: 'low',
   tag: 'home',
 }
@@ -25,6 +26,7 @@ describe('buildTask', () => {
       title: 'Comprar pan',
       note: '',
       date: '2026-11-08',
+      time: null,
       priority: 'low',
       tag: 'home',
       completed: false,
@@ -70,6 +72,11 @@ describe('validateTaskInput', () => {
     const errors = validateTaskInput({ ...input, title: '   ', date: '' })
     expect(errors.title).toBeDefined()
     expect(errors.date).toBeDefined()
+  })
+
+  it('accepts an empty time and rejects an invalid one', () => {
+    expect(validateTaskInput({ ...input, time: '09:15' })).toEqual({})
+    expect(validateTaskInput({ ...input, time: '25:00' }).time).toBeDefined()
   })
 
   it('limits the title length', () => {

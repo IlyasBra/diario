@@ -1,5 +1,5 @@
 import { type EntityModel } from '@/lib/data/repository'
-import { isISODate } from '@/lib/dates'
+import { isISODate, isTimeString } from '@/lib/dates'
 
 import { type Task, type TaskChanges, type TaskInput } from './types'
 
@@ -43,8 +43,8 @@ export const taskModel: EntityModel<Task, TaskInput, TaskChanges> = {
 
 /** The editable fields of a task, e.g. to prefill the edit form. */
 export function toTaskInput(task: Task): TaskInput {
-  const { title, note, date, priority, tag } = task
-  return { title, note, date, priority, tag }
+  const { title, note, date, time, priority, tag } = task
+  return { title, note, date, time, priority, tag }
 }
 
 function normalizeInput(input: TaskInput): TaskInput {
@@ -52,6 +52,7 @@ function normalizeInput(input: TaskInput): TaskInput {
     title: input.title.trim(),
     note: input.note.trim(),
     date: input.date,
+    time: input.time,
     priority: input.priority,
     tag: input.tag,
   }
@@ -60,6 +61,7 @@ function normalizeInput(input: TaskInput): TaskInput {
 export interface TaskInputErrors {
   title?: string
   date?: string
+  time?: string
 }
 
 /** Form validation. Returns an empty object when the input is valid. */
@@ -72,6 +74,7 @@ export function validateTaskInput(input: TaskInput): TaskInputErrors {
     errors.title = `El título no puede superar ${TITLE_MAX_LENGTH} caracteres.`
 
   if (!isISODate(input.date)) errors.date = 'Elige una fecha.'
+  if (input.time !== null && !isTimeString(input.time)) errors.time = 'Escribe una hora válida.'
 
   return errors
 }

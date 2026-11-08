@@ -32,13 +32,15 @@ describe('MainScreen', () => {
     await user.click(await screen.findByRole('button', { name: 'Nueva tarea' }))
     const dialog = screen.getByRole('dialog', { name: 'Nueva tarea' })
     await user.type(within(dialog).getByLabelText('Título'), 'Comprar pan')
+    await user.type(within(dialog).getByLabelText('Hora (opcional)'), '10:30')
     await user.click(within(dialog).getByRole('radio', { name: 'Alta' }))
     await user.click(within(dialog).getByRole('button', { name: 'Añadir' }))
 
     expect(await screen.findByLabelText('Comprar pan')).not.toBeChecked()
+    expect(screen.getByText('10:30')).toBeInTheDocument()
     expect(screen.getByText('Hoy tienes 1 tarea, 0 completadas.')).toBeInTheDocument()
     expect(await repository.list()).toMatchObject([
-      { title: 'Comprar pan', date: TODAY, priority: 'high' },
+      { title: 'Comprar pan', date: TODAY, time: '10:30', priority: 'high' },
     ])
   })
 

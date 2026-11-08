@@ -9,16 +9,31 @@ export const DATABASE_NAME = 'diario'
  * each object is stored as-is. Booleans cannot be indexed in IndexedDB, so
  * "completed" is filtered in memory.
  *
- * To change the schema, add a new `this.version(n)` with an upgrade
- * function instead of editing an existing version.
+ * Never edit an existing version: add a new one with an upgrade function,
+ * so users who already have data are migrated on their next visit.
  */
 export class DiarioDatabase extends Dexie {
   declare tasks: Table<Task, string>
 
   constructor(name: string = DATABASE_NAME) {
     super(name)
+
     this.version(1).stores({
       tasks: 'id, date, updatedAt',
     })
+
+    // v2: tasks get an optional time of day.
+    this.version(2)
+      .stores({
+        tasks: 'id, date, updatedAt',
+      })
+      .upgrade((tx) =>
+        tx
+          .table<Partial<Task>>('tasks')
+          .toCollection()
+          .modify((task) => {
+            task.time ??= null
+          }),
+      )
   }
 }

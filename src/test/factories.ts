@@ -10,6 +10,7 @@ export function makeTask(overrides: Partial<Task> = {}): Task {
     title: `Tarea ${sequence}`,
     note: '',
     date: '2026-11-08',
+    time: null,
     priority: 'medium',
     tag: 'personal',
     completed: false,

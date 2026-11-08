@@ -13,6 +13,7 @@ const input: TaskInput = {
   title: 'Llamar al dentista',
   note: 'Pedir cita para revisión',
   date: '2026-11-10',
+  time: '10:30',
   priority: 'high',
   tag: 'personal',
 }
