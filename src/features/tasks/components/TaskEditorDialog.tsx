@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 
-import { Button } from '@/components/ui/Button'
+import { ConfirmDelete } from '@/components/ui/ConfirmDelete'
+import { DeleteButton } from '@/components/ui/DeleteButton'
 import { Dialog } from '@/components/ui/Dialog'
-import { TrashIcon } from '@/components/ui/icons'
 import { type ISODate } from '@/lib/dates'
 
 import { toTaskInput } from '../model'
@@ -46,13 +46,6 @@ interface TaskEditorContentProps {
 function TaskEditorContent({ state, today, onClose }: TaskEditorContentProps) {
   const { createTask, updateTask, deleteTask } = useTasks()
   const [confirmingDelete, setConfirmingDelete] = useState(false)
-  const cancelDeleteRef = useRef<HTMLButtonElement>(null)
-
-  // The trash button disappears when asking for confirmation; move focus to
-  // the safe choice so keyboard and screen reader users are not lost.
-  useEffect(() => {
-    if (confirmingDelete) cancelDeleteRef.current?.focus()
-  }, [confirmingDelete])
 
   if (state.mode === 'create') {
     const initialValues: TaskInput = {
@@ -83,32 +76,17 @@ function TaskEditorContent({ state, today, onClose }: TaskEditorContentProps) {
 
   if (confirmingDelete) {
     return (
-      <div className="space-y-4">
-        <p role="alert">
-          ¿Seguro que quieres borrar <strong className="break-words">«{task.title}»</strong>? No se
-          puede deshacer.
-        </p>
-        <div className="flex justify-end gap-2">
-          <Button
-            ref={cancelDeleteRef}
-            onClick={() => {
-              setConfirmingDelete(false)
-            }}
-          >
-            Cancelar
-          </Button>
-          <Button
-            variant="danger"
-            onClick={() => {
-              void deleteTask(task.id).then((deleted) => {
-                if (deleted) onClose()
-              })
-            }}
-          >
-            Borrar
-          </Button>
-        </div>
-      </div>
+      <ConfirmDelete
+        itemName={task.title}
+        onCancel={() => {
+          setConfirmingDelete(false)
+        }}
+        onConfirm={() => {
+          void deleteTask(task.id).then((deleted) => {
+            if (deleted) onClose()
+          })
+        }}
+      />
     )
   }
 
@@ -124,18 +102,12 @@ function TaskEditorContent({ state, today, onClose }: TaskEditorContentProps) {
         return saved
       }}
       secondaryAction={
-        <Button
-          variant="ghost"
-          size="icon"
+        <DeleteButton
+          label="Borrar tarea"
           onClick={() => {
             setConfirmingDelete(true)
           }}
-          className="text-red-700 hover:bg-red-50 hover:text-red-800 dark:text-red-400 dark:hover:bg-red-950"
-          title="Borrar tarea"
-        >
-          <TrashIcon />
-          <span className="sr-only">Borrar tarea</span>
-        </Button>
+        />
       }
     />
   )
