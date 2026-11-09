@@ -107,3 +107,11 @@ export function CloseIcon(props: IconProps) {
     </Icon>
   )
 }
+
+export function ArchiveIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M3 5h18v4H3zM5 9v10h14V9M10 13h4" />
+    </Icon>
+  )
+}

@@ -41,4 +41,10 @@ export class InMemoryRepository<T extends Entity, Input, Changes> implements Rep
     this.items.delete(id)
     return Promise.resolve()
   }
+
+  replaceAll(items: readonly T[]): Promise<void> {
+    this.items.clear()
+    for (const item of items) this.items.set(item.id, item)
+    return Promise.resolve()
+  }
 }

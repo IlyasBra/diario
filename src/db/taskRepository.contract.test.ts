@@ -5,6 +5,7 @@ import { type TaskRepository } from '@/features/tasks/data/taskRepository'
 import { taskModel } from '@/features/tasks/model'
 import { type TaskInput } from '@/features/tasks/types'
 import { EntityNotFoundError } from '@/lib/data/repository'
+import { makeTask } from '@/test/factories'
 
 import { DiarioDatabase } from './database'
 import { DexieRepository } from './dexieRepository'
@@ -71,6 +72,15 @@ describe.each(implementations)('%s', (_name, setup) => {
 
   it('rejects updates to a missing task', async () => {
     await expect(repo.update('missing', { title: 'x' })).rejects.toBeInstanceOf(EntityNotFoundError)
+  })
+
+  it('replaces every task at once', async () => {
+    await repo.create(input)
+    const restored = [makeTask({ title: 'Restaurada' })]
+
+    await repo.replaceAll(restored)
+
+    expect(await repo.list()).toEqual(restored)
   })
 
   it('removes a task', async () => {

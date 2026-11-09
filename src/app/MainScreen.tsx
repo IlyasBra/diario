@@ -4,8 +4,9 @@ import { AppShell } from '@/components/layout/AppShell'
 import { MainNav } from '@/components/layout/MainNav'
 import { Button } from '@/components/ui/Button'
 import { EmptyState } from '@/components/ui/EmptyState'
-import { PlusIcon } from '@/components/ui/icons'
+import { ArchiveIcon, PlusIcon } from '@/components/ui/icons'
 import { Notice } from '@/components/ui/Notice'
+import { BackupDialog } from '@/features/backup/components/BackupDialog'
 import { InAppAlerts } from '@/features/notifications/components/InAppAlerts'
 import { NotificationPrompt } from '@/features/notifications/components/NotificationPrompt'
 import { useAlertScheduler } from '@/features/notifications/useAlertScheduler'
@@ -25,6 +26,7 @@ import { UpcomingView } from '@/features/tasks/components/UpcomingView'
 import { useTasks } from '@/features/tasks/state/useTasks'
 import { type Task } from '@/features/tasks/types'
 import { useHashRoute } from '@/hooks/useHashRoute'
+import { usePersistentStorage } from '@/hooks/usePersistentStorage'
 import { addDaysToISODate, type ISODate } from '@/lib/dates'
 
 import { DEFAULT_ROUTE, NAV_ITEMS, type Route, ROUTES } from './routes'
@@ -46,6 +48,8 @@ export function MainScreen({ today, isPersistent }: MainScreenProps) {
   const reminders = useReminders()
   const [taskEditor, setTaskEditor] = useState<TaskEditorState | null>(null)
   const [reminderEditor, setReminderEditor] = useState<ReminderEditorState | null>(null)
+  const [backupOpen, setBackupOpen] = useState(false)
+  const isStoragePersistent = usePersistentStorage()
 
   useScrollToTopOnRouteChange(route)
 
@@ -79,7 +83,23 @@ export function MainScreen({ today, isPersistent }: MainScreenProps) {
   }, [])
 
   return (
-    <AppShell today={today} nav={<MainNav items={NAV_ITEMS} currentId={route} />}>
+    <AppShell
+      today={today}
+      nav={<MainNav items={NAV_ITEMS} currentId={route} />}
+      headerActions={
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => {
+            setBackupOpen(true)
+          }}
+          className="-mr-2"
+        >
+          <ArchiveIcon />
+          <span className="sr-only">Copia de seguridad</span>
+        </Button>
+      }
+    >
       <div className="mb-6 space-y-3 empty:hidden">
         {!isPersistent && (
           <Notice tone="warning">
@@ -132,6 +152,13 @@ export function MainScreen({ today, isPersistent }: MainScreenProps) {
 
       <InAppAlerts alerts={inAppAlerts} onDismiss={dismissAlert} />
 
+      <BackupDialog
+        open={backupOpen}
+        onClose={() => {
+          setBackupOpen(false)
+        }}
+        isStoragePersistent={isStoragePersistent}
+      />
       <TaskEditorDialog
         state={taskEditor}
         today={today}

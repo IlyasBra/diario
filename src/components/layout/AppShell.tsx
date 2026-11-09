@@ -8,10 +8,12 @@ interface AppShellProps {
   today: ISODate
   /** Main navigation: bottom bar on phones, under the header on desktop. */
   nav?: ReactNode
+  /** Buttons shown at the right of the header. */
+  headerActions?: ReactNode
   children: ReactNode
 }
 
-export function AppShell({ today, nav, children }: AppShellProps) {
+export function AppShell({ today, nav, headerActions, children }: AppShellProps) {
   return (
     <div className="flex min-h-dvh flex-col">
       <a
@@ -20,7 +22,7 @@ export function AppShell({ today, nav, children }: AppShellProps) {
       >
         Saltar al contenido
       </a>
-      <AppHeader today={today} />
+      <AppHeader today={today} actions={headerActions} />
       {nav}
       {/* Bottom padding leaves room for the fixed bottom bar and the + button. */}
       <main

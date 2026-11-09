@@ -9,6 +9,7 @@ export interface StoreErrorMessages {
   create: string
   update: string
   remove: string
+  replace: string
 }
 
 export interface RepositoryStore<T extends Entity, Input, Changes> {
@@ -21,6 +22,8 @@ export interface RepositoryStore<T extends Entity, Input, Changes> {
   create: (input: Input) => Promise<boolean>
   update: (id: string, changes: Changes) => Promise<boolean>
   remove: (id: string) => Promise<boolean>
+  /** Replaces all items (restoring a backup). Resolves to true on success. */
+  replaceAll: (items: readonly T[]) => Promise<boolean>
 }
 
 /**
@@ -122,12 +125,24 @@ export function useRepositoryStore<T extends Entity, Input, Changes>(
     [attempt, repository, messages],
   )
 
+  const replaceAll = useCallback(
+    async (next: readonly T[]) => {
+      const done = await attempt(async () => {
+        await repository.replaceAll(next)
+        return true
+      }, messages.replace)
+      if (done) setItems([...next])
+      return done === true
+    },
+    [attempt, repository, messages],
+  )
+
   const dismissError = useCallback(() => {
     setError(null)
   }, [])
 
   return useMemo(
-    () => ({ items, status, error, dismissError, create, update, remove }),
-    [items, status, error, dismissError, create, update, remove],
+    () => ({ items, status, error, dismissError, create, update, remove, replaceAll }),
+    [items, status, error, dismissError, create, update, remove, replaceAll],
   )
 }

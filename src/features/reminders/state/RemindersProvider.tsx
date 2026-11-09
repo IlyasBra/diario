@@ -10,6 +10,7 @@ const ERROR_MESSAGES: StoreErrorMessages = {
   create: 'No se ha podido crear el recordatorio.',
   update: 'No se ha podido guardar el recordatorio.',
   remove: 'No se ha podido borrar el recordatorio.',
+  replace: 'No se han podido restaurar los recordatorios.',
 }
 
 interface RemindersProviderProps {
@@ -29,6 +30,7 @@ export function RemindersProvider({ repository, children }: RemindersProviderPro
       createReminder: store.create,
       updateReminder: store.update,
       deleteReminder: store.remove,
+      replaceReminders: store.replaceAll,
     }),
     [store],
   )

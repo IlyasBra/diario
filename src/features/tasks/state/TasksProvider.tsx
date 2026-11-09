@@ -10,6 +10,7 @@ const ERROR_MESSAGES: StoreErrorMessages = {
   create: 'No se ha podido crear la tarea.',
   update: 'No se ha podido guardar la tarea.',
   remove: 'No se ha podido borrar la tarea.',
+  replace: 'No se han podido restaurar las tareas.',
 }
 
 interface TasksProviderProps {
@@ -31,6 +32,7 @@ export function TasksProvider({ repository, children }: TasksProviderProps) {
       createTask: store.create,
       updateTask: store.update,
       deleteTask: store.remove,
+      replaceTasks: store.replaceAll,
     }),
     [store],
   )
