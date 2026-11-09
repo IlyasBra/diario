@@ -3,22 +3,25 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { InMemoryReminderRepository } from '@/features/reminders/data/inMemoryReminderRepository'
-import { RemindersProvider } from '@/features/reminders/state/RemindersProvider'
 import { type Reminder } from '@/features/reminders/types'
 import { InMemoryTaskRepository } from '@/features/tasks/data/inMemoryTaskRepository'
-import { TasksProvider } from '@/features/tasks/state/TasksProvider'
 import { type Task } from '@/features/tasks/types'
 import { makeReminder, makeTask } from '@/test/factories'
+import { createTestRepositories } from '@/test/repositories'
+import { TestProviders } from '@/test/TestProviders'
 
 import { MainScreen } from './MainScreen'
 
 function renderApp({ reminders = [], tasks = [] }: { reminders?: Reminder[]; tasks?: Task[] }) {
   render(
-    <TasksProvider repository={new InMemoryTaskRepository(tasks)}>
-      <RemindersProvider repository={new InMemoryReminderRepository(reminders)}>
-        <MainScreen today="2026-11-11" isPersistent />
-      </RemindersProvider>
-    </TasksProvider>,
+    <TestProviders
+      repositories={createTestRepositories({
+        tasks: new InMemoryTaskRepository(tasks),
+        reminders: new InMemoryReminderRepository(reminders),
+      })}
+    >
+      <MainScreen today="2026-11-11" isPersistent />
+    </TestProviders>,
   )
 }
 

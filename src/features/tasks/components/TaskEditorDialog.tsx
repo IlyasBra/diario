@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { ConfirmDelete } from '@/components/ui/ConfirmDelete'
 import { DeleteButton } from '@/components/ui/DeleteButton'
 import { Dialog } from '@/components/ui/Dialog'
+import { useTags } from '@/features/tags/state/useTags'
 import { type ISODate } from '@/lib/dates'
 
 import { toTaskInput } from '../model'
@@ -45,6 +46,7 @@ interface TaskEditorContentProps {
 
 function TaskEditorContent({ state, today, onClose }: TaskEditorContentProps) {
   const { createTask, updateTask, deleteTask } = useTasks()
+  const { tags } = useTags()
   const [confirmingDelete, setConfirmingDelete] = useState(false)
 
   if (state.mode === 'create') {
@@ -54,7 +56,7 @@ function TaskEditorContent({ state, today, onClose }: TaskEditorContentProps) {
       date: state.date,
       time: null,
       priority: 'medium',
-      tag: 'personal',
+      tag: tags.find((tag) => tag.id === 'personal')?.id ?? tags[0]?.id ?? 'other',
     }
     return (
       <TaskForm

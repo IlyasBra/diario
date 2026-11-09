@@ -3,11 +3,11 @@ import { type ReactNode, type SubmitEvent, useId, useRef, useState } from 'react
 import { Button } from '@/components/ui/Button'
 import { Field } from '@/components/ui/Field'
 import { inputClassName } from '@/components/ui/styles'
+import { useTags } from '@/features/tags/state/useTags'
 import { addDaysToISODate, type ISODate } from '@/lib/dates'
 
-import { TAG_LABELS } from '../labels'
 import { NOTE_MAX_LENGTH, TITLE_MAX_LENGTH, validateTaskInput } from '../model'
-import { TAGS, type Tag, type TaskInput } from '../types'
+import { type TaskInput } from '../types'
 import { PriorityPicker } from './PriorityPicker'
 
 interface TaskFormProps {
@@ -32,6 +32,7 @@ export function TaskForm({
   onCancel,
   secondaryAction,
 }: TaskFormProps) {
+  const { tags } = useTags()
   const [values, setValues] = useState<TaskInput>(initialValues)
   const [showErrors, setShowErrors] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
@@ -189,15 +190,19 @@ export function TaskForm({
           id={ids.tag}
           value={values.tag}
           onChange={(event) => {
-            update('tag', event.target.value as Tag)
+            update('tag', event.target.value)
           }}
           className={inputClassName}
         >
-          {TAGS.map((tag) => (
-            <option key={tag} value={tag}>
-              {TAG_LABELS[tag]}
+          {tags.map((tag) => (
+            <option key={tag.id} value={tag.id}>
+              {tag.name}
             </option>
           ))}
+          {/* Keeps the value valid if the task's tag was deleted. */}
+          {!tags.some((tag) => tag.id === values.tag) && (
+            <option value={values.tag}>Sin etiqueta</option>
+          )}
         </select>
       </Field>
 

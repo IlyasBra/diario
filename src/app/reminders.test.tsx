@@ -3,11 +3,10 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { InMemoryReminderRepository } from '@/features/reminders/data/inMemoryReminderRepository'
-import { RemindersProvider } from '@/features/reminders/state/RemindersProvider'
 import { type Reminder } from '@/features/reminders/types'
-import { InMemoryTaskRepository } from '@/features/tasks/data/inMemoryTaskRepository'
-import { TasksProvider } from '@/features/tasks/state/TasksProvider'
 import { makeReminder } from '@/test/factories'
+import { createTestRepositories } from '@/test/repositories'
+import { TestProviders } from '@/test/TestProviders'
 
 import { MainScreen } from './MainScreen'
 
@@ -17,11 +16,9 @@ const NOW = new Date(2026, 10, 11, 12, 0)
 function renderReminders(initialReminders: Reminder[] = []) {
   const repository = new InMemoryReminderRepository(initialReminders)
   render(
-    <TasksProvider repository={new InMemoryTaskRepository()}>
-      <RemindersProvider repository={repository}>
-        <MainScreen today="2026-11-11" isPersistent />
-      </RemindersProvider>
-    </TasksProvider>,
+    <TestProviders repositories={createTestRepositories({ reminders: repository })}>
+      <MainScreen today="2026-11-11" isPersistent />
+    </TestProviders>,
   )
   return { repository, user: userEvent.setup() }
 }

@@ -6,7 +6,9 @@ import { ArrowRightIcon, ClockIcon, PencilIcon } from '@/components/ui/icons'
 import { cn } from '@/lib/cn'
 import { formatShortDate, type ISODate } from '@/lib/dates'
 
-import { PRIORITY_LABELS, TAG_LABELS } from '../labels'
+import { TagBadge } from '@/features/tags/components/TagBadge'
+
+import { PRIORITY_LABELS } from '../labels'
 import { isOverdue } from '../selectors'
 import { type Priority, type Task } from '../types'
 
@@ -76,7 +78,7 @@ export function TaskItem({ task, today, onToggle, onPostpone, onEdit }: TaskItem
               <span className="sr-only">Prioridad </span>
               {PRIORITY_LABELS[task.priority]}
             </Badge>
-            <Badge>{TAG_LABELS[task.tag]}</Badge>
+            <TagBadge tagId={task.tag} />
           </div>
         </div>
       </div>

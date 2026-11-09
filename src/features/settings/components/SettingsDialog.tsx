@@ -1,5 +1,7 @@
 import { Dialog } from '@/components/ui/Dialog'
 
+import { TagsSection } from '@/features/tags/components/TagsSection'
+
 import { type ThemePreference } from '../theme'
 import { BackupSection } from './BackupSection'
 import { ThemeSection } from './ThemeSection'
@@ -17,6 +19,7 @@ export function SettingsDialog({ open, onClose, theme, isStoragePersistent }: Se
     <Dialog open={open} onClose={onClose} title="Ajustes">
       <div className="space-y-8">
         <ThemeSection preference={theme.preference} onChange={theme.onChange} />
+        <TagsSection />
         <BackupSection isStoragePersistent={isStoragePersistent} />
       </div>
     </Dialog>

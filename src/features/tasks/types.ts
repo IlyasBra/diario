@@ -3,9 +3,6 @@ import { type ISODate, type TimeString } from '@/lib/dates'
 export const PRIORITIES = ['high', 'medium', 'low'] as const
 export type Priority = (typeof PRIORITIES)[number]
 
-export const TAGS = ['home', 'studies', 'work', 'personal', 'other'] as const
-export type Tag = (typeof TAGS)[number]
-
 export interface Task {
   id: string
   title: string
@@ -16,7 +13,8 @@ export interface Task {
   /** Optional time of day, e.g. an appointment at "10:30". */
   time: TimeString | null
   priority: Priority
-  tag: Tag
+  /** Id of a user tag (see features/tags). */
+  tag: string
   completed: boolean
   /** ISO timestamp, null while the task is pending. */
   completedAt: string | null

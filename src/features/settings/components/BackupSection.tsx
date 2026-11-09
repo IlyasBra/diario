@@ -3,6 +3,7 @@ import { type ChangeEvent, useState } from 'react'
 import { Button } from '@/components/ui/Button'
 import { Notice } from '@/components/ui/Notice'
 import { useReminders } from '@/features/reminders/state/useReminders'
+import { useTags } from '@/features/tags/state/useTags'
 import { useTasks } from '@/features/tasks/state/useTasks'
 import { downloadTextFile } from '@/lib/download'
 import { pluralize } from '@/lib/text'
@@ -28,12 +29,13 @@ interface Feedback {
 export function BackupSection({ isStoragePersistent }: BackupSectionProps) {
   const { tasks, replaceTasks } = useTasks()
   const { reminders, replaceReminders } = useReminders()
+  const { tags, replaceTags } = useTags()
   const [pending, setPending] = useState<BackupFile | null>(null)
   const [feedback, setFeedback] = useState<Feedback | null>(null)
 
   const exportBackup = () => {
     const now = new Date()
-    const backup = createBackup(tasks, reminders, now)
+    const backup = createBackup(tasks, reminders, tags, now)
     downloadTextFile(backupFileName(now), JSON.stringify(backup, null, 2), 'application/json')
     setFeedback({ tone: 'done', message: 'Copia guardada. Consérvala en un lugar seguro.' })
   }
@@ -53,10 +55,12 @@ export function BackupSection({ isStoragePersistent }: BackupSectionProps) {
 
   const restore = async () => {
     if (!pending) return
-    // Tasks first: if it fails nothing has been replaced yet.
-    const tasksDone = await replaceTasks(pending.tasks)
-    const remindersDone = tasksDone && (await replaceReminders(pending.reminders))
-    if (remindersDone) {
+    // Tags first: tasks refer to them. If a step fails, later ones are skipped.
+    const done =
+      (await replaceTags(pending.tags)) &&
+      (await replaceTasks(pending.tasks)) &&
+      (await replaceReminders(pending.reminders))
+    if (done) {
       setPending(null)
       setFeedback({ tone: 'done', message: 'Copia restaurada.' })
     } else {

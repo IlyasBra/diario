@@ -2,12 +2,11 @@ import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { InMemoryReminderRepository } from '@/features/reminders/data/inMemoryReminderRepository'
-import { RemindersProvider } from '@/features/reminders/state/RemindersProvider'
 import { InMemoryTaskRepository } from '@/features/tasks/data/inMemoryTaskRepository'
-import { TasksProvider } from '@/features/tasks/state/TasksProvider'
 import { type Task } from '@/features/tasks/types'
 import { makeTask } from '@/test/factories'
+import { createTestRepositories } from '@/test/repositories'
+import { TestProviders } from '@/test/TestProviders'
 
 import { MainScreen } from './MainScreen'
 
@@ -16,11 +15,9 @@ const TODAY = '2026-11-08'
 function renderApp(initialTasks: Task[] = []) {
   const repository = new InMemoryTaskRepository(initialTasks)
   render(
-    <TasksProvider repository={repository}>
-      <RemindersProvider repository={new InMemoryReminderRepository()}>
-        <MainScreen today={TODAY} isPersistent />
-      </RemindersProvider>
-    </TasksProvider>,
+    <TestProviders repositories={createTestRepositories({ tasks: repository })}>
+      <MainScreen today={TODAY} isPersistent />
+    </TestProviders>,
   )
   return { repository, user: userEvent.setup() }
 }
@@ -74,12 +71,11 @@ describe('MainScreen', () => {
       }
     }
     vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    const tasks = new FailingRepository([makeTask({ title: 'Leer', date: TODAY })])
     render(
-      <TasksProvider repository={new FailingRepository([makeTask({ title: 'Leer', date: TODAY })])}>
-        <RemindersProvider repository={new InMemoryReminderRepository()}>
-          <MainScreen today={TODAY} isPersistent />
-        </RemindersProvider>
-      </TasksProvider>,
+      <TestProviders repositories={createTestRepositories({ tasks })}>
+        <MainScreen today={TODAY} isPersistent />
+      </TestProviders>,
     )
 
     await userEvent.click(await screen.findByLabelText('Leer'))

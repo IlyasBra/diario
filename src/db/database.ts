@@ -1,6 +1,7 @@
 import { Dexie, type Table } from 'dexie'
 
 import { type Reminder } from '@/features/reminders/types'
+import { type Tag } from '@/features/tags/types'
 import { type Task } from '@/features/tasks/types'
 
 export const DATABASE_NAME = 'diario'
@@ -16,6 +17,7 @@ export const DATABASE_NAME = 'diario'
 export class DiarioDatabase extends Dexie {
   declare tasks: Table<Task, string>
   declare reminders: Table<Reminder, string>
+  declare tags: Table<Tag, string>
 
   constructor(name: string = DATABASE_NAME) {
     super(name)
@@ -42,6 +44,13 @@ export class DiarioDatabase extends Dexie {
     this.version(3).stores({
       tasks: 'id, date, updatedAt',
       reminders: 'id, date',
+    })
+
+    // v4: user-defined tags. Defaults are created on open (ensureDefaultTags).
+    this.version(4).stores({
+      tasks: 'id, date, updatedAt',
+      reminders: 'id, date',
+      tags: 'id',
     })
   }
 }

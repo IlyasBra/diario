@@ -16,6 +16,7 @@ import {
   type ReminderEditorState,
 } from '@/features/reminders/components/ReminderEditorDialog'
 import { RemindersView } from '@/features/reminders/components/RemindersView'
+import { useTags } from '@/features/tags/state/useTags'
 import { useReminders } from '@/features/reminders/state/useReminders'
 import { type Reminder } from '@/features/reminders/types'
 import {
@@ -47,6 +48,7 @@ export function MainScreen({ today, isPersistent }: MainScreenProps) {
   const route = useHashRoute(ROUTES, DEFAULT_ROUTE)
   const tasks = useTasks()
   const reminders = useReminders()
+  const tags = useTags()
   const [taskEditor, setTaskEditor] = useState<TaskEditorState | null>(null)
   const [reminderEditor, setReminderEditor] = useState<ReminderEditorState | null>(null)
   const [settingsOpen, setSettingsOpen] = useState(false)
@@ -56,9 +58,9 @@ export function MainScreen({ today, isPersistent }: MainScreenProps) {
   useScrollToTopOnRouteChange(route)
 
   const status =
-    tasks.status === 'error' || reminders.status === 'error'
+    tasks.status === 'error' || reminders.status === 'error' || tags.status === 'error'
       ? 'error'
-      : tasks.status === 'ready' && reminders.status === 'ready'
+      : tasks.status === 'ready' && reminders.status === 'ready' && tags.status === 'ready'
         ? 'ready'
         : 'loading'
 

@@ -1,9 +1,13 @@
-import { PRIORITIES, TAGS, type Task } from '@/features/tasks/types'
+import { buildDefaultTags } from '@/features/tags/defaults'
+import { isTagColor } from '@/features/tags/model'
+import { type Tag } from '@/features/tags/types'
+import { PRIORITIES, type Task } from '@/features/tasks/types'
 import { REPEATS, type Reminder } from '@/features/reminders/types'
 import { isISODate, isTimeString } from '@/lib/dates'
 
 export const BACKUP_APP = 'diario'
-export const BACKUP_VERSION = 1
+/** v1 had fixed tags and no `tags` list; v2 stores the user's tags. */
+export const BACKUP_VERSION = 2
 
 /** Everything the app stores, in a format meant to be saved as a .json file. */
 export interface BackupFile {
@@ -13,6 +17,7 @@ export interface BackupFile {
   exportedAt: string
   tasks: Task[]
   reminders: Reminder[]
+  tags: Tag[]
 }
 
 export type ParseBackupResult = { ok: true; backup: BackupFile } | { ok: false; error: string }
@@ -20,6 +25,7 @@ export type ParseBackupResult = { ok: true; backup: BackupFile } | { ok: false; 
 export function createBackup(
   tasks: readonly Task[],
   reminders: readonly Reminder[],
+  tags: readonly Tag[],
   now: Date,
 ): BackupFile {
   return {
@@ -28,6 +34,7 @@ export function createBackup(
     exportedAt: now.toISOString(),
     tasks: [...tasks],
     reminders: [...reminders],
+    tags: [...tags],
   }
 }
 
@@ -70,8 +77,26 @@ export function parseBackup(text: string): ParseBackupResult {
     if (!isReminder(item)) return fail('La copia contiene recordatorios con datos no válidos.')
     reminders.push(item)
   }
-  if (hasDuplicateIds(tasks) || hasDuplicateIds(reminders)) {
+
+  // Version 1 backups predate custom tags: they used the default ones.
+  const tags: Tag[] = []
+  if (data.tags === undefined) {
+    tags.push(...buildDefaultTags(new Date(data.exportedAt)))
+  } else if (Array.isArray(data.tags)) {
+    for (const item of data.tags as unknown[]) {
+      if (!isTag(item)) return fail('La copia contiene etiquetas con datos no válidos.')
+      tags.push(item)
+    }
+  } else {
+    return fail('Faltan datos en la copia.')
+  }
+
+  if (hasDuplicateIds(tasks) || hasDuplicateIds(reminders) || hasDuplicateIds(tags)) {
     return fail('La copia contiene elementos repetidos.')
+  }
+  const tagIds = new Set(tags.map((tag) => tag.id))
+  if (tasks.some((task) => !tagIds.has(task.tag))) {
+    return fail('La copia contiene tareas con etiquetas desconocidas.')
   }
 
   return {
@@ -82,6 +107,7 @@ export function parseBackup(text: string): ParseBackupResult {
       exportedAt: data.exportedAt,
       tasks,
       reminders,
+      tags,
     },
   }
 }
@@ -117,7 +143,8 @@ function isTask(value: unknown): value is Task {
     isISODate(value.date) &&
     (value.time === null || (typeof value.time === 'string' && isTimeString(value.time))) &&
     isIncluded(PRIORITIES, value.priority) &&
-    isIncluded(TAGS, value.tag) &&
+    typeof value.tag === 'string' &&
+    value.tag !== '' &&
     typeof value.completed === 'boolean' &&
     (value.completedAt === null || isTimestamp(value.completedAt)) &&
     isTimestamp(value.createdAt) &&
@@ -137,6 +164,19 @@ function isReminder(value: unknown): value is Reminder {
     typeof value.time === 'string' &&
     isTimeString(value.time) &&
     isIncluded(REPEATS, value.repeat) &&
+    isTimestamp(value.createdAt) &&
+    isTimestamp(value.updatedAt)
+  )
+}
+
+function isTag(value: unknown): value is Tag {
+  return (
+    isRecord(value) &&
+    typeof value.id === 'string' &&
+    value.id !== '' &&
+    typeof value.name === 'string' &&
+    value.name.trim() !== '' &&
+    isTagColor(value.color) &&
     isTimestamp(value.createdAt) &&
     isTimestamp(value.updatedAt)
   )
