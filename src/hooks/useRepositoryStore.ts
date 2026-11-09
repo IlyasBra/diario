@@ -24,6 +24,8 @@ export interface RepositoryStore<T extends Entity, Input, Changes> {
   remove: (id: string) => Promise<boolean>
   /** Replaces all items (restoring a backup). Resolves to true on success. */
   replaceAll: (items: readonly T[]) => Promise<boolean>
+  /** Puts a previously deleted item back, with its original id. */
+  restore: (item: T) => Promise<boolean>
 }
 
 /**
@@ -137,12 +139,24 @@ export function useRepositoryStore<T extends Entity, Input, Changes>(
     [attempt, repository, messages],
   )
 
+  const restore = useCallback(
+    async (item: T) => {
+      const done = await attempt(async () => {
+        await repository.put(item)
+        return true
+      }, messages.create)
+      if (done) setItems((current) => [...current.filter((other) => other.id !== item.id), item])
+      return done === true
+    },
+    [attempt, repository, messages],
+  )
+
   const dismissError = useCallback(() => {
     setError(null)
   }, [])
 
   return useMemo(
-    () => ({ items, status, error, dismissError, create, update, remove, replaceAll }),
-    [items, status, error, dismissError, create, update, remove, replaceAll],
+    () => ({ items, status, error, dismissError, create, update, remove, replaceAll, restore }),
+    [items, status, error, dismissError, create, update, remove, replaceAll, restore],
   )
 }

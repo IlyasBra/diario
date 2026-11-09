@@ -47,6 +47,10 @@ export class DexieRepository<T extends Entity, Input, Changes> implements Reposi
     await this.table.delete(id)
   }
 
+  async put(item: T): Promise<void> {
+    await this.table.put(item)
+  }
+
   replaceAll(items: readonly T[]): Promise<void> {
     // One transaction: if anything fails, the previous data stays untouched.
     return this.table.db.transaction('rw', this.table, async () => {

@@ -30,6 +30,7 @@ import { TodayView } from '@/features/tasks/components/TodayView'
 import { UpcomingView } from '@/features/tasks/components/UpcomingView'
 import { useTasks } from '@/features/tasks/state/useTasks'
 import { type Task } from '@/features/tasks/types'
+import { UndoProvider } from '@/features/undo/UndoProvider'
 import { useHashRoute } from '@/hooks/useHashRoute'
 import { usePersistentStorage } from '@/hooks/usePersistentStorage'
 import { addDaysToISODate, type ISODate } from '@/lib/dates'
@@ -92,122 +93,124 @@ export function MainScreen({ today, isPersistent }: MainScreenProps) {
   }, [])
 
   return (
-    <AppShell
-      today={today}
-      nav={<MainNav items={NAV_ITEMS} currentId={route} />}
-      headerActions={
-        <>
-          <a
-            href="#buscar"
-            aria-current={route === 'buscar' ? 'page' : undefined}
-            className="inline-flex size-11 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
-          >
-            <SearchIcon />
-            <span className="sr-only">Buscar</span>
-          </a>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => {
-              setSettingsOpen(true)
-            }}
-            className="-mr-2"
-          >
-            <SettingsIcon />
-            <span className="sr-only">Ajustes</span>
-          </Button>
-        </>
-      }
-    >
-      <div className="mb-6 space-y-3 empty:hidden">
-        {!isPersistent && (
-          <Notice tone="warning">
-            Este navegador no permite guardar datos: lo que apuntes se perderá al cerrar la app.
-          </Notice>
-        )}
-        {tasks.error && (
-          <Notice tone="error" onDismiss={tasks.dismissError}>
-            {tasks.error} Inténtalo de nuevo.
-          </Notice>
-        )}
-        {reminders.error && (
-          <Notice tone="error" onDismiss={reminders.dismissError}>
-            {reminders.error} Inténtalo de nuevo.
-          </Notice>
-        )}
-      </div>
-
-      {status === 'loading' && <p className="text-slate-600 dark:text-slate-400">Cargando…</p>}
-      {status === 'error' && (
-        <EmptyState
-          title="No se han podido cargar tus datos"
-          description="Recarga la página. Si el problema sigue, revisa el espacio libre del dispositivo."
-        />
-      )}
-      {status === 'ready' && (
-        <>
-          {(route === 'hoy' || route === 'proximos') && (
-            <details className="mb-6 rounded-xl ring-1 ring-slate-200 dark:ring-slate-800">
-              <summary className="flex min-h-11 cursor-pointer items-center px-3 text-sm font-medium">
-                Filtros{isFilterActive(filter) ? ' (activos)' : ''}
-              </summary>
-              <div className="px-3 pb-3">
-                <FilterBar filter={filter} onChange={setFilter} />
-              </div>
-            </details>
-          )}
-          {route === 'hoy' && (
-            <TodayView today={today} onCreate={openCreate} onEdit={editTask} filter={filter} />
-          )}
-          {route === 'proximos' && (
-            <UpcomingView today={today} onCreate={openCreate} onEdit={editTask} filter={filter} />
-          )}
-          {route === 'buscar' && (
-            <SearchView today={today} onEditTask={editTask} onEditReminder={editReminder} />
-          )}
-          {route === 'recordatorios' && (
-            <RemindersView
-              onCreate={openCreate}
-              onEdit={editReminder}
-              banner={<NotificationPrompt />}
-            />
-          )}
-
-          <Button
-            variant="primary"
-            onClick={openCreate}
-            className="fixed right-4 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-20 h-14 rounded-full pr-5 pl-4 shadow-lg md:bottom-8"
-          >
-            <PlusIcon />
-            {CREATE_LABELS[route]}
-          </Button>
-        </>
-      )}
-
-      <InAppAlerts alerts={inAppAlerts} onDismiss={dismissAlert} />
-
-      <SettingsDialog
-        open={settingsOpen}
-        onClose={() => {
-          setSettingsOpen(false)
-        }}
-        theme={{ preference: theme.preference, onChange: theme.setPreference }}
-        isStoragePersistent={isStoragePersistent}
-      />
-      <TaskEditorDialog
-        state={taskEditor}
+    <UndoProvider>
+      <AppShell
         today={today}
-        onClose={() => {
-          setTaskEditor(null)
-        }}
-      />
-      <ReminderEditorDialog
-        state={reminderEditor}
-        onClose={() => {
-          setReminderEditor(null)
-        }}
-      />
-    </AppShell>
+        nav={<MainNav items={NAV_ITEMS} currentId={route} />}
+        headerActions={
+          <>
+            <a
+              href="#buscar"
+              aria-current={route === 'buscar' ? 'page' : undefined}
+              className="inline-flex size-11 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+            >
+              <SearchIcon />
+              <span className="sr-only">Buscar</span>
+            </a>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                setSettingsOpen(true)
+              }}
+              className="-mr-2"
+            >
+              <SettingsIcon />
+              <span className="sr-only">Ajustes</span>
+            </Button>
+          </>
+        }
+      >
+        <div className="mb-6 space-y-3 empty:hidden">
+          {!isPersistent && (
+            <Notice tone="warning">
+              Este navegador no permite guardar datos: lo que apuntes se perderá al cerrar la app.
+            </Notice>
+          )}
+          {tasks.error && (
+            <Notice tone="error" onDismiss={tasks.dismissError}>
+              {tasks.error} Inténtalo de nuevo.
+            </Notice>
+          )}
+          {reminders.error && (
+            <Notice tone="error" onDismiss={reminders.dismissError}>
+              {reminders.error} Inténtalo de nuevo.
+            </Notice>
+          )}
+        </div>
+
+        {status === 'loading' && <p className="text-slate-600 dark:text-slate-400">Cargando…</p>}
+        {status === 'error' && (
+          <EmptyState
+            title="No se han podido cargar tus datos"
+            description="Recarga la página. Si el problema sigue, revisa el espacio libre del dispositivo."
+          />
+        )}
+        {status === 'ready' && (
+          <>
+            {(route === 'hoy' || route === 'proximos') && (
+              <details className="mb-6 rounded-xl ring-1 ring-slate-200 dark:ring-slate-800">
+                <summary className="flex min-h-11 cursor-pointer items-center px-3 text-sm font-medium">
+                  Filtros{isFilterActive(filter) ? ' (activos)' : ''}
+                </summary>
+                <div className="px-3 pb-3">
+                  <FilterBar filter={filter} onChange={setFilter} />
+                </div>
+              </details>
+            )}
+            {route === 'hoy' && (
+              <TodayView today={today} onCreate={openCreate} onEdit={editTask} filter={filter} />
+            )}
+            {route === 'proximos' && (
+              <UpcomingView today={today} onCreate={openCreate} onEdit={editTask} filter={filter} />
+            )}
+            {route === 'buscar' && (
+              <SearchView today={today} onEditTask={editTask} onEditReminder={editReminder} />
+            )}
+            {route === 'recordatorios' && (
+              <RemindersView
+                onCreate={openCreate}
+                onEdit={editReminder}
+                banner={<NotificationPrompt />}
+              />
+            )}
+
+            <Button
+              variant="primary"
+              onClick={openCreate}
+              className="fixed right-4 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-20 h-14 rounded-full pr-5 pl-4 shadow-lg md:bottom-8"
+            >
+              <PlusIcon />
+              {CREATE_LABELS[route]}
+            </Button>
+          </>
+        )}
+
+        <InAppAlerts alerts={inAppAlerts} onDismiss={dismissAlert} />
+
+        <SettingsDialog
+          open={settingsOpen}
+          onClose={() => {
+            setSettingsOpen(false)
+          }}
+          theme={{ preference: theme.preference, onChange: theme.setPreference }}
+          isStoragePersistent={isStoragePersistent}
+        />
+        <TaskEditorDialog
+          state={taskEditor}
+          today={today}
+          onClose={() => {
+            setTaskEditor(null)
+          }}
+        />
+        <ReminderEditorDialog
+          state={reminderEditor}
+          onClose={() => {
+            setReminderEditor(null)
+          }}
+        />
+      </AppShell>
+    </UndoProvider>
   )
 }
 

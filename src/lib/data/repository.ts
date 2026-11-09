@@ -14,6 +14,8 @@ export interface Repository<T extends Entity, Input, Changes> {
   create(input: Input): Promise<T>
   update(id: string, changes: Changes): Promise<T>
   remove(id: string): Promise<void>
+  /** Stores an item with its own id, creating or overwriting it (used to undo a delete). */
+  put(item: T): Promise<void>
   /** Replaces every stored item at once (used to restore a backup). All or nothing. */
   replaceAll(items: readonly T[]): Promise<void>
 }

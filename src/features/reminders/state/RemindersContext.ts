@@ -13,6 +13,7 @@ export interface RemindersContextValue {
   updateReminder: (id: string, changes: ReminderChanges) => Promise<boolean>
   deleteReminder: (id: string) => Promise<boolean>
   replaceReminders: (reminders: readonly Reminder[]) => Promise<boolean>
+  restoreReminder: (reminder: Reminder) => Promise<boolean>
 }
 
 export const RemindersContext = createContext<RemindersContextValue | null>(null)

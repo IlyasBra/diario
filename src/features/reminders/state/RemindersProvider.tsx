@@ -31,6 +31,7 @@ export function RemindersProvider({ repository, children }: RemindersProviderPro
       updateReminder: store.update,
       deleteReminder: store.remove,
       replaceReminders: store.replaceAll,
+      restoreReminder: store.restore,
     }),
     [store],
   )

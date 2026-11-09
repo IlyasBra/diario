@@ -4,6 +4,7 @@ import { ConfirmDelete } from '@/components/ui/ConfirmDelete'
 import { DeleteButton } from '@/components/ui/DeleteButton'
 import { Dialog } from '@/components/ui/Dialog'
 import { useTags } from '@/features/tags/state/useTags'
+import { useUndo } from '@/features/undo/useUndo'
 import { type ISODate } from '@/lib/dates'
 
 import { toTaskInput } from '../model'
@@ -45,7 +46,8 @@ interface TaskEditorContentProps {
 }
 
 function TaskEditorContent({ state, today, onClose }: TaskEditorContentProps) {
-  const { createTask, updateTask, deleteTask } = useTasks()
+  const { createTask, updateTask, deleteTask, restoreTask } = useTasks()
+  const { showUndo } = useUndo()
   const { tags } = useTags()
   const [confirmingDelete, setConfirmingDelete] = useState(false)
 
@@ -87,7 +89,11 @@ function TaskEditorContent({ state, today, onClose }: TaskEditorContentProps) {
         }}
         onConfirm={() => {
           void deleteTask(task.id).then((deleted) => {
-            if (deleted) onClose()
+            if (!deleted) return
+            onClose()
+            showUndo('Tarea borrada', () => {
+              void restoreTask(task)
+            })
           })
         }}
       />

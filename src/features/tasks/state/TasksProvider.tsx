@@ -33,6 +33,7 @@ export function TasksProvider({ repository, children }: TasksProviderProps) {
       updateTask: store.update,
       deleteTask: store.remove,
       replaceTasks: store.replaceAll,
+      restoreTask: store.restore,
     }),
     [store],
   )

@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 
+import { useUndo } from '@/features/undo/useUndo'
 import { addDaysToISODate, type ISODate } from '@/lib/dates'
 
 import { type TaskItemActions } from '../components/TaskItem'
@@ -15,6 +16,7 @@ import { useTasks } from './useTasks'
  */
 export function useTaskItemActions(today: ISODate, onEdit: (task: Task) => void): TaskItemActions {
   const { tasks, updateTask } = useTasks()
+  const { showUndo } = useUndo()
 
   return useMemo(() => {
     const stored = (task: Task) => tasks.find((candidate) => candidate.id === task.id) ?? task
@@ -23,9 +25,20 @@ export function useTaskItemActions(today: ISODate, onEdit: (task: Task) => void)
       onToggle: (task) => {
         const original = stored(task)
         if (isRecurring(original)) {
+          const completing = !original.doneDates.includes(task.date)
           void updateTask(original.id, { doneDates: toggleDoneDate(original.doneDates, task.date) })
+          if (completing) {
+            showUndo('Tarea completada', () => {
+              void updateTask(original.id, { doneDates: original.doneDates })
+            })
+          }
         } else {
           void updateTask(original.id, { completed: !original.completed })
+          if (!original.completed) {
+            showUndo('Tarea completada', () => {
+              void updateTask(original.id, { completed: false })
+            })
+          }
         }
       },
       onToggleSubtask: (task, subtaskId) => {
@@ -41,5 +54,5 @@ export function useTaskItemActions(today: ISODate, onEdit: (task: Task) => void)
         onEdit(stored(task))
       },
     }
-  }, [tasks, today, onEdit, updateTask])
+  }, [tasks, today, onEdit, updateTask, showUndo])
 }

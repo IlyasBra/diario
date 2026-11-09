@@ -76,6 +76,15 @@ describe.each(implementations)('%s', (_name, setup) => {
     await expect(repo.update('missing', { title: 'x' })).rejects.toBeInstanceOf(EntityNotFoundError)
   })
 
+  it('puts back a deleted task with its original id', async () => {
+    const task = await repo.create(input)
+    await repo.remove(task.id)
+
+    await repo.put(task)
+
+    expect(await repo.list()).toEqual([task])
+  })
+
   it('replaces every task at once', async () => {
     await repo.create(input)
     const restored = [makeTask({ title: 'Restaurada' })]

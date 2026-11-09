@@ -15,6 +15,7 @@ export interface TasksContextValue {
   updateTask: (id: string, changes: TaskChanges) => Promise<boolean>
   deleteTask: (id: string) => Promise<boolean>
   replaceTasks: (tasks: readonly Task[]) => Promise<boolean>
+  restoreTask: (task: Task) => Promise<boolean>
 }
 
 export const TasksContext = createContext<TasksContextValue | null>(null)

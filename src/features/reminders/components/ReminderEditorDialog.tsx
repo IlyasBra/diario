@@ -1,3 +1,4 @@
+import { useUndo } from '@/features/undo/useUndo'
 import { useState } from 'react'
 
 import { ConfirmDelete } from '@/components/ui/ConfirmDelete'
@@ -41,7 +42,8 @@ function ReminderEditorContent({
   state: ReminderEditorState
   onClose: () => void
 }) {
-  const { createReminder, updateReminder, deleteReminder } = useReminders()
+  const { createReminder, updateReminder, deleteReminder, restoreReminder } = useReminders()
+  const { showUndo } = useUndo()
   const [confirmingDelete, setConfirmingDelete] = useState(false)
 
   if (state.mode === 'create') {
@@ -78,7 +80,11 @@ function ReminderEditorContent({
         }}
         onConfirm={() => {
           void deleteReminder(reminder.id).then((deleted) => {
-            if (deleted) onClose()
+            if (!deleted) return
+            onClose()
+            showUndo('Recordatorio borrado', () => {
+              void restoreReminder(reminder)
+            })
           })
         }}
       />
