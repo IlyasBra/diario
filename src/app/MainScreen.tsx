@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/Button'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { PlusIcon, SearchIcon, SettingsIcon } from '@/components/ui/icons'
 import { Notice } from '@/components/ui/Notice'
+import { CalendarView } from '@/features/calendar/components/CalendarView'
+import { StatsView } from '@/features/stats/components/StatsView'
 import { FilterBar } from '@/features/search/components/FilterBar'
 import { SearchView } from '@/features/search/components/SearchView'
 import { EMPTY_FILTER, isFilterActive, type TaskFilter } from '@/features/search/filters'
@@ -40,7 +42,9 @@ import { DEFAULT_ROUTE, NAV_ITEMS, type Route, ROUTES } from './routes'
 const CREATE_LABELS: Record<Route, string> = {
   hoy: 'Nueva tarea',
   proximos: 'Nueva tarea',
+  calendario: 'Nueva tarea',
   recordatorios: 'Nuevo recordatorio',
+  resumen: 'Nueva tarea',
   buscar: 'Nueva tarea',
 }
 
@@ -58,6 +62,7 @@ export function MainScreen({ today, isPersistent }: MainScreenProps) {
   const [reminderEditor, setReminderEditor] = useState<ReminderEditorState | null>(null)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [filter, setFilter] = useState<TaskFilter>(EMPTY_FILTER)
+  const [calendarDay, setCalendarDay] = useState(today)
   const theme = useTheme()
   const isStoragePersistent = usePersistentStorage()
 
@@ -82,9 +87,14 @@ export function MainScreen({ today, isPersistent }: MainScreenProps) {
     else
       setTaskEditor({
         mode: 'create',
-        date: route === 'proximos' ? addDaysToISODate(today, 1) : today,
+        date:
+          route === 'proximos'
+            ? addDaysToISODate(today, 1)
+            : route === 'calendario'
+              ? calendarDay
+              : today,
       })
-  }, [route, today])
+  }, [route, today, calendarDay])
   const editTask = useCallback((task: Task) => {
     setTaskEditor({ mode: 'edit', task })
   }, [])
@@ -164,6 +174,19 @@ export function MainScreen({ today, isPersistent }: MainScreenProps) {
             {route === 'proximos' && (
               <UpcomingView today={today} onCreate={openCreate} onEdit={editTask} filter={filter} />
             )}
+            {route === 'calendario' && (
+              <CalendarView
+                today={today}
+                selectedDate={calendarDay}
+                onSelectDate={setCalendarDay}
+                onCreateTask={(date) => {
+                  setTaskEditor({ mode: 'create', date })
+                }}
+                onEditTask={editTask}
+                onEditReminder={editReminder}
+              />
+            )}
+            {route === 'resumen' && <StatsView today={today} />}
             {route === 'buscar' && (
               <SearchView today={today} onEditTask={editTask} onEditReminder={editReminder} />
             )}
