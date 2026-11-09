@@ -1,13 +1,22 @@
 import { buildDefaultTags } from '@/features/tags/defaults'
 import { isTagColor } from '@/features/tags/model'
 import { type Tag } from '@/features/tags/types'
-import { PRIORITIES, type Task } from '@/features/tasks/types'
+import {
+  PRIORITIES,
+  type Subtask,
+  type Task,
+  type TaskRepeat,
+  type WeekdayIndex,
+} from '@/features/tasks/types'
 import { REPEATS, type Reminder } from '@/features/reminders/types'
 import { isISODate, isTimeString } from '@/lib/dates'
 
 export const BACKUP_APP = 'diario'
-/** v1 had fixed tags and no `tags` list; v2 stores the user's tags. */
-export const BACKUP_VERSION = 2
+/**
+ * v1 had fixed tags and no `tags` list; v2 stores the user's tags; v3 adds
+ * repeating tasks and checklists. Older backups still import.
+ */
+export const BACKUP_VERSION = 3
 
 /** Everything the app stores, in a format meant to be saved as a .json file. */
 export interface BackupFile {
@@ -69,8 +78,9 @@ export function parseBackup(text: string): ParseBackupResult {
 
   const tasks: Task[] = []
   for (const item of data.tasks as unknown[]) {
-    if (!isTask(item)) return fail('La copia contiene tareas con datos no válidos.')
-    tasks.push(item)
+    const task = readTask(item)
+    if (!task) return fail('La copia contiene tareas con datos no válidos.')
+    tasks.push(task)
   }
   const reminders: Reminder[] = []
   for (const item of data.reminders as unknown[]) {
@@ -132,8 +142,12 @@ function isTimestamp(value: unknown): value is string {
   return typeof value === 'string' && !Number.isNaN(Date.parse(value))
 }
 
-function isTask(value: unknown): value is Task {
-  return (
+/**
+ * Validates one task. Fields added in later versions (repeat, doneDates,
+ * subtasks) are optional in old backups and get their default value.
+ */
+function readTask(value: unknown): Task | null {
+  if (!(
     isRecord(value) &&
     typeof value.id === 'string' &&
     value.id !== '' &&
@@ -149,7 +163,75 @@ function isTask(value: unknown): value is Task {
     (value.completedAt === null || isTimestamp(value.completedAt)) &&
     isTimestamp(value.createdAt) &&
     isTimestamp(value.updatedAt)
-  )
+  )) {
+    return null
+  }
+
+  const repeat = value.repeat === undefined ? ({ kind: 'none' } as const) : readRepeat(value.repeat)
+  const doneDates = value.doneDates === undefined ? [] : readDoneDates(value.doneDates)
+  const subtasks = value.subtasks === undefined ? [] : readSubtasks(value.subtasks)
+  if (!repeat || !doneDates || !subtasks) return null
+
+  return {
+    id: value.id,
+    title: value.title,
+    note: value.note,
+    date: value.date,
+    time: value.time,
+    priority: value.priority,
+    tag: value.tag,
+    completed: value.completed,
+    completedAt: value.completedAt,
+    repeat,
+    doneDates,
+    subtasks,
+    createdAt: value.createdAt,
+    updatedAt: value.updatedAt,
+  }
+}
+
+function readRepeat(value: unknown): TaskRepeat | null {
+  if (!isRecord(value)) return null
+  switch (value.kind) {
+    case 'none':
+    case 'daily':
+    case 'monthly':
+      return { kind: value.kind }
+    case 'weekly': {
+      const days = value.days
+      const valid =
+        Array.isArray(days) &&
+        days.length > 0 &&
+        days.every((day) => Number.isInteger(day) && (day as number) >= 0 && (day as number) <= 6)
+      return valid ? { kind: 'weekly', days: days as WeekdayIndex[] } : null
+    }
+    default:
+      return null
+  }
+}
+
+function readDoneDates(value: unknown): string[] | null {
+  return Array.isArray(value) && value.every((day) => typeof day === 'string' && isISODate(day))
+    ? value
+    : null
+}
+
+function readSubtasks(value: unknown): Subtask[] | null {
+  if (!Array.isArray(value)) return null
+  const subtasks: Subtask[] = []
+  for (const item of value as unknown[]) {
+    if (!(
+      isRecord(item) &&
+      typeof item.id === 'string' &&
+      item.id !== '' &&
+      typeof item.title === 'string' &&
+      typeof item.done === 'boolean'
+    )) {
+      return null
+    }
+    subtasks.push({ id: item.id, title: item.title, done: item.done })
+  }
+  return subtasks
 }
 
 function isReminder(value: unknown): value is Reminder {

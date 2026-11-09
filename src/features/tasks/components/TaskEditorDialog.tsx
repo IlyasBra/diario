@@ -56,6 +56,8 @@ function TaskEditorContent({ state, today, onClose }: TaskEditorContentProps) {
       date: state.date,
       time: null,
       priority: 'medium',
+      repeat: { kind: 'none' },
+      subtasks: [],
       tag: tags.find((tag) => tag.id === 'personal')?.id ?? tags[0]?.id ?? 'other',
     }
     return (

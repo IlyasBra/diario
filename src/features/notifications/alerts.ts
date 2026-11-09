@@ -1,7 +1,8 @@
 import { getOccurrencesBetween } from '@/features/reminders/occurrences'
 import { type Reminder } from '@/features/reminders/types'
+import { selectTasksOnDay } from '@/features/tasks/selectors'
 import { type Task } from '@/features/tasks/types'
-import { combineDateAndTime, formatTime } from '@/lib/dates'
+import { addDaysToISODate, combineDateAndTime, formatTime, toISODate } from '@/lib/dates'
 
 export interface Alert {
   /** Unique per occurrence, used to never notify the same thing twice. */
@@ -35,16 +36,20 @@ export function collectDueAlerts(
     }
   }
 
-  for (const task of tasks) {
-    if (task.completed || task.time === null) continue
-    const at = combineDateAndTime(task.date, task.time)
-    if (at < afterFrom || at > to) continue
-    alerts.push({
-      key: `task:${task.id}:${task.date}T${task.time}`,
-      title: task.title,
-      body: [`Tarea · ${task.time}`, task.note].filter(Boolean).join('\n'),
-      at,
-    })
+  // Day by day, so repeating tasks produce one alert per occurrence.
+  const lastDay = toISODate(to)
+  for (let day = toISODate(afterFrom); day <= lastDay; day = addDaysToISODate(day, 1)) {
+    for (const task of selectTasksOnDay(tasks, day)) {
+      if (task.completed || task.time === null) continue
+      const at = combineDateAndTime(day, task.time)
+      if (at < afterFrom || at > to) continue
+      alerts.push({
+        key: `task:${task.id}:${day}T${task.time}`,
+        title: task.title,
+        body: [`Tarea · ${task.time}`, task.note].filter(Boolean).join('\n'),
+        at,
+      })
+    }
   }
 
   return alerts.sort((a, b) => a.at.getTime() - b.at.getTime())

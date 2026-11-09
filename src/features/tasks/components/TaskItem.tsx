@@ -2,13 +2,14 @@ import { useId } from 'react'
 
 import { Badge, type BadgeTone } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
-import { ArrowRightIcon, ClockIcon, PencilIcon } from '@/components/ui/icons'
+import { ArrowRightIcon, ClockIcon, PencilIcon, RepeatIcon } from '@/components/ui/icons'
 import { cn } from '@/lib/cn'
 import { formatShortDate, type ISODate } from '@/lib/dates'
 
 import { TagBadge } from '@/features/tags/components/TagBadge'
 
 import { PRIORITY_LABELS } from '../labels'
+import { describeRepeat, isRecurring } from '../recurrence'
 import { isOverdue } from '../selectors'
 import { type Priority, type Task } from '../types'
 
@@ -20,6 +21,7 @@ const PRIORITY_TONES: Record<Priority, BadgeTone> = {
 
 export interface TaskItemActions {
   onToggle: (task: Task) => void
+  onToggleSubtask: (task: Task, subtaskId: string) => void
   onPostpone: (task: Task) => void
   onEdit: (task: Task) => void
 }
@@ -29,11 +31,19 @@ interface TaskItemProps extends TaskItemActions {
   today: ISODate
 }
 
-export function TaskItem({ task, today, onToggle, onPostpone, onEdit }: TaskItemProps) {
+export function TaskItem({
+  task,
+  today,
+  onToggle,
+  onToggleSubtask,
+  onPostpone,
+  onEdit,
+}: TaskItemProps) {
   const checkboxId = useId()
   const detailsId = useId()
   const overdue = isOverdue(task, today)
-  const canPostpone = !task.completed && task.date <= today
+  const canPostpone = !task.completed && task.date <= today && !isRecurring(task)
+  const doneSubtasks = task.subtasks.filter((subtask) => subtask.done).length
 
   return (
     <li className="flex items-start gap-3 rounded-xl bg-white p-3 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
@@ -73,6 +83,18 @@ export function TaskItem({ task, today, onToggle, onPostpone, onEdit }: TaskItem
                 <time className="tabular-nums">{task.time}</time>
               </Badge>
             )}
+            {isRecurring(task) && (
+              <Badge tone="info">
+                <RepeatIcon className="mr-1 size-3.5" />
+                {describeRepeat(task)}
+              </Badge>
+            )}
+            {task.subtasks.length > 0 && (
+              <Badge>
+                <span className="sr-only">Subtareas hechas: </span>
+                {doneSubtasks}/{task.subtasks.length}
+              </Badge>
+            )}
             {overdue && <Badge tone="danger">Atrasada · {formatShortDate(task.date)}</Badge>}
             <Badge tone={PRIORITY_TONES[task.priority]}>
               <span className="sr-only">Prioridad </span>
@@ -80,6 +102,32 @@ export function TaskItem({ task, today, onToggle, onPostpone, onEdit }: TaskItem
             </Badge>
             <TagBadge tagId={task.tag} />
           </div>
+          {task.subtasks.length > 0 && (
+            <ul className="mt-2 space-y-0.5">
+              {task.subtasks.map((subtask) => (
+                <li key={subtask.id}>
+                  <label className="flex min-h-9 cursor-pointer items-center gap-2.5 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={subtask.done}
+                      onChange={() => {
+                        onToggleSubtask(task, subtask.id)
+                      }}
+                      className="size-5 shrink-0 cursor-pointer rounded accent-brand-600"
+                    />
+                    <span
+                      className={cn(
+                        'break-words',
+                        subtask.done && 'text-slate-500 line-through dark:text-slate-500',
+                      )}
+                    >
+                      {subtask.title}
+                    </span>
+                  </label>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
 

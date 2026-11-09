@@ -9,6 +9,8 @@ import { addDaysToISODate, type ISODate } from '@/lib/dates'
 import { NOTE_MAX_LENGTH, TITLE_MAX_LENGTH, validateTaskInput } from '../model'
 import { type TaskInput } from '../types'
 import { PriorityPicker } from './PriorityPicker'
+import { RepeatField } from './RepeatField'
+import { SubtasksField } from './SubtasksField'
 
 interface TaskFormProps {
   initialValues: TaskInput
@@ -61,11 +63,11 @@ export function TaskForm({
     event.preventDefault()
     const validation = validateTaskInput(values)
 
-    if (validation.title ?? validation.date ?? validation.time) {
+    if (validation.title ?? validation.date ?? validation.time ?? validation.repeat) {
       setShowErrors(true)
       // Move focus to the first invalid field so screen readers announce it.
       const firstInvalid = validation.title ? titleRef : validation.date ? dateRef : timeRef
-      firstInvalid.current?.focus()
+      if (validation.title ?? validation.date ?? validation.time) firstInvalid.current?.focus()
       return
     }
 
@@ -114,7 +116,12 @@ export function TaskForm({
         />
       </Field>
 
-      <Field label="Fecha" htmlFor={ids.date} errorId={ids.dateError} error={errors.date}>
+      <Field
+        label={values.repeat.kind === 'none' ? 'Fecha' : 'Empieza el'}
+        htmlFor={ids.date}
+        errorId={ids.dateError}
+        error={errors.date}
+      >
         <div className="flex gap-2">
           <input
             ref={dateRef}
@@ -177,6 +184,24 @@ export function TaskForm({
           )}
         </div>
       </Field>
+
+      <RepeatField
+        value={values.repeat}
+        startDate={values.date}
+        error={errors.repeat}
+        onChange={(repeat) => {
+          update('repeat', repeat)
+        }}
+      />
+
+      {values.repeat.kind === 'none' && (
+        <SubtasksField
+          value={values.subtasks}
+          onChange={(subtasks) => {
+            update('subtasks', subtasks)
+          }}
+        />
+      )}
 
       <PriorityPicker
         value={values.priority}

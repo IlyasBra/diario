@@ -52,5 +52,23 @@ export class DiarioDatabase extends Dexie {
       reminders: 'id, date',
       tags: 'id',
     })
+
+    // v5: tasks can repeat and have a checklist.
+    this.version(5)
+      .stores({
+        tasks: 'id, date, updatedAt',
+        reminders: 'id, date',
+        tags: 'id',
+      })
+      .upgrade((tx) =>
+        tx
+          .table<Partial<Task>>('tasks')
+          .toCollection()
+          .modify((task) => {
+            task.repeat ??= { kind: 'none' }
+            task.doneDates ??= []
+            task.subtasks ??= []
+          }),
+      )
   }
 }

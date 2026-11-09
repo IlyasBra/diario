@@ -15,6 +15,8 @@ const input: TaskInput = {
   time: null,
   priority: 'low',
   tag: 'home',
+  repeat: { kind: 'none' },
+  subtasks: [],
 }
 
 describe('buildTask', () => {
@@ -31,6 +33,9 @@ describe('buildTask', () => {
       tag: 'home',
       completed: false,
       completedAt: null,
+      repeat: { kind: 'none' },
+      doneDates: [],
+      subtasks: [],
       createdAt: NOW.toISOString(),
       updatedAt: NOW.toISOString(),
     })

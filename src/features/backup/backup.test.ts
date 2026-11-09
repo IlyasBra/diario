@@ -101,3 +101,56 @@ describe('backup', () => {
     expect(parseBackup(text).ok).toBe(false)
   })
 })
+
+describe('backup of repeating tasks and checklists', () => {
+  it('round-trips repeat, doneDates and subtasks', () => {
+    const repeating = makeTask({
+      repeat: { kind: 'weekly', days: [0, 3] },
+      doneDates: ['2026-11-09'],
+    })
+    const checklist = makeTask({
+      subtasks: [
+        { id: 's1', title: 'Leche', done: true },
+        { id: 's2', title: 'Pan', done: false },
+      ],
+    })
+
+    const result = parseBackup(JSON.stringify(createBackup([repeating, checklist], [], TAGS, NOW)))
+
+    expect(result).toMatchObject({ ok: true, backup: { tasks: [repeating, checklist] } })
+  })
+
+  it('fills defaults for tasks from older backups', () => {
+    // A task as stored before repeat, doneDates and subtasks existed.
+    const legacyTask = Object.fromEntries(
+      Object.entries(makeTask({ title: 'Antigua' })).filter(
+        ([key]) => !['repeat', 'doneDates', 'subtasks'].includes(key),
+      ),
+    )
+    const text = JSON.stringify({
+      ...createBackup([], [], TAGS, NOW),
+      version: 2,
+      tasks: [legacyTask],
+    })
+
+    expect(parseBackup(text)).toMatchObject({
+      ok: true,
+      backup: {
+        tasks: [{ title: 'Antigua', repeat: { kind: 'none' }, doneDates: [], subtasks: [] }],
+      },
+    })
+  })
+
+  it.each([
+    ['an unknown repeat kind', { repeat: { kind: 'yearly' } }],
+    ['a weekly repeat without days', { repeat: { kind: 'weekly', days: [] } }],
+    ['a weekday out of range', { repeat: { kind: 'weekly', days: [7] } }],
+    ['invalid done dates', { doneDates: ['mañana'] }],
+    ['an invalid subtask', { subtasks: [{ id: 'x', title: 3, done: false }] }],
+  ])('rejects a task with %s', (_name, override) => {
+    const task = { ...makeTask(), ...override }
+    expect(
+      parseBackup(JSON.stringify({ ...createBackup([], [], TAGS, NOW), tasks: [task] })).ok,
+    ).toBe(false)
+  })
+})

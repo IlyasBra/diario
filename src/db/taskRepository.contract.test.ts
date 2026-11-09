@@ -17,6 +17,8 @@ const input: TaskInput = {
   time: '10:30',
   priority: 'high',
   tag: 'personal',
+  repeat: { kind: 'none' },
+  subtasks: [],
 }
 
 /**

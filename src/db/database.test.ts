@@ -20,3 +20,26 @@ describe('DiarioDatabase migrations', () => {
     await db.delete()
   })
 })
+
+describe('migration to v5 (repeating tasks and checklists)', () => {
+  it('gives existing tasks the default repeat, doneDates and subtasks', async () => {
+    const name = `test-${crypto.randomUUID()}`
+    const old = new Dexie(name)
+    old.version(1).stores({ tasks: 'id, date, updatedAt' })
+    old.version(2).stores({ tasks: 'id, date, updatedAt' })
+    old.version(3).stores({ tasks: 'id, date, updatedAt', reminders: 'id, date' })
+    await old.table('tasks').add({ id: 't1', title: 'Vieja', date: '2026-11-01', time: null })
+    old.close()
+
+    const db = new DiarioDatabase(name)
+    const task = await db.tasks.get('t1')
+
+    expect(task).toMatchObject({
+      title: 'Vieja',
+      repeat: { kind: 'none' },
+      doneDates: [],
+      subtasks: [],
+    })
+    await db.delete()
+  })
+})

@@ -86,3 +86,36 @@ describe('summarizeDay', () => {
     expect(summarizeDay(tasks, TODAY)).toEqual({ total: 2, completed: 1, overdue: 1 })
   })
 })
+
+describe('repeating tasks', () => {
+  const daily = makeTask({
+    title: 'Beber agua',
+    date: '2026-11-01',
+    repeat: { kind: 'daily' },
+    doneDates: ['2026-11-08'],
+  })
+
+  it("appear today with that day's completion and are never overdue", () => {
+    const result = selectTodayTasks([daily], TODAY)
+
+    expect(result.overdue).toEqual([])
+    expect(result.today).toMatchObject([{ title: 'Beber agua', date: TODAY, completed: true }])
+  })
+
+  it('are listed for the next two weeks in the upcoming view', () => {
+    const groups = selectUpcomingGroups([daily], TODAY)
+
+    expect(groups).toHaveLength(14)
+    expect(groups[0]).toMatchObject({ date: '2026-11-09' })
+    expect(groups[0]?.tasks[0]).toMatchObject({ completed: false })
+    expect(groups.at(-1)?.date).toBe('2026-11-22')
+  })
+
+  it('count in the day summary', () => {
+    expect(summarizeDay([daily, makeTask({ date: TODAY })], TODAY)).toEqual({
+      total: 2,
+      completed: 1,
+      overdue: 0,
+    })
+  })
+})
