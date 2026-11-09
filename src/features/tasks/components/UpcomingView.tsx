@@ -49,6 +49,7 @@ export function UpcomingView({ today, onCreate, onEdit, filter }: UpcomingViewPr
             title={formatDayHeading(group.date, today)}
             tasks={group.tasks}
             today={today}
+            draggable
             {...actions}
           />
         ))

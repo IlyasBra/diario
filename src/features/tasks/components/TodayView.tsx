@@ -29,11 +29,18 @@ export function TodayView({ today, onCreate, onEdit, filter }: TodayViewProps) {
       <DaySummary summary={summarizeDay(tasks, today)} />
 
       {overdue.length > 0 && (
-        <TaskSection title="Atrasadas" tone="danger" tasks={overdue} today={today} {...actions} />
+        <TaskSection
+          title="Atrasadas"
+          tone="danger"
+          tasks={overdue}
+          today={today}
+          draggable
+          {...actions}
+        />
       )}
 
       {todayTasks.length > 0 ? (
-        <TaskSection title="Hoy" tasks={todayTasks} today={today} {...actions} />
+        <TaskSection title="Hoy" tasks={todayTasks} today={today} draggable {...actions} />
       ) : isFilterActive(filter) ? (
         overdue.length === 0 && (
           <EmptyState

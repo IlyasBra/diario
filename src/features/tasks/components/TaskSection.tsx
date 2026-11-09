@@ -4,6 +4,8 @@ import { cn } from '@/lib/cn'
 import { type ISODate } from '@/lib/dates'
 
 import { type Task } from '../types'
+import { isRecurring } from '../recurrence'
+import { DraggableTaskItem } from './DraggableTaskItem'
 import { TaskItem, type TaskItemActions } from './TaskItem'
 
 interface TaskSectionProps extends TaskItemActions {
@@ -11,6 +13,8 @@ interface TaskSectionProps extends TaskItemActions {
   tasks: Task[]
   today: ISODate
   tone?: 'default' | 'danger'
+  /** Show a handle to drag one-off tasks to another day (needs <TaskDragProvider>). */
+  draggable?: boolean
 }
 
 /** A titled group of tasks: "Atrasadas", "Hoy", "Mañana"… */
@@ -19,6 +23,7 @@ export function TaskSection({
   tasks,
   today,
   tone = 'default',
+  draggable = false,
   ...actions
 }: TaskSectionProps) {
   const headingId = useId()
@@ -39,9 +44,13 @@ export function TaskSection({
         <span className="ml-1.5 font-normal">({tasks.length})</span>
       </h2>
       <ul className="space-y-2">
-        {tasks.map((task) => (
-          <TaskItem key={task.id} task={task} today={today} {...actions} />
-        ))}
+        {tasks.map((task) =>
+          draggable && !isRecurring(task) ? (
+            <DraggableTaskItem key={task.id} task={task} today={today} {...actions} />
+          ) : (
+            <TaskItem key={task.id} task={task} today={today} {...actions} />
+          ),
+        )}
       </ul>
     </section>
   )

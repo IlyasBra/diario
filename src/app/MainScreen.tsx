@@ -28,6 +28,7 @@ import {
   TaskEditorDialog,
   type TaskEditorState,
 } from '@/features/tasks/components/TaskEditorDialog'
+import { TaskDragProvider } from '@/features/tasks/components/TaskDragProvider'
 import { TodayView } from '@/features/tasks/components/TodayView'
 import { UpcomingView } from '@/features/tasks/components/UpcomingView'
 import { useTasks } from '@/features/tasks/state/useTasks'
@@ -169,10 +170,19 @@ export function MainScreen({ today, isPersistent }: MainScreenProps) {
               </details>
             )}
             {route === 'hoy' && (
-              <TodayView today={today} onCreate={openCreate} onEdit={editTask} filter={filter} />
+              <TaskDragProvider today={today}>
+                <TodayView today={today} onCreate={openCreate} onEdit={editTask} filter={filter} />
+              </TaskDragProvider>
             )}
             {route === 'proximos' && (
-              <UpcomingView today={today} onCreate={openCreate} onEdit={editTask} filter={filter} />
+              <TaskDragProvider today={today}>
+                <UpcomingView
+                  today={today}
+                  onCreate={openCreate}
+                  onEdit={editTask}
+                  filter={filter}
+                />
+              </TaskDragProvider>
             )}
             {route === 'calendario' && (
               <CalendarView

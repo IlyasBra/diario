@@ -1,4 +1,4 @@
-import { useId } from 'react'
+import { type CSSProperties, type ReactNode, type Ref, useId } from 'react'
 
 import { Badge, type BadgeTone } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
@@ -29,6 +29,11 @@ export interface TaskItemActions {
 interface TaskItemProps extends TaskItemActions {
   task: Task
   today: ISODate
+  /** Set by DraggableTaskItem: the drag handle and the drag state of the row. */
+  handle?: ReactNode
+  rootRef?: Ref<HTMLLIElement>
+  rootStyle?: CSSProperties
+  isDragging?: boolean
 }
 
 export function TaskItem({
@@ -38,6 +43,10 @@ export function TaskItem({
   onToggleSubtask,
   onPostpone,
   onEdit,
+  handle,
+  rootRef,
+  rootStyle,
+  isDragging = false,
 }: TaskItemProps) {
   const checkboxId = useId()
   const detailsId = useId()
@@ -46,7 +55,15 @@ export function TaskItem({
   const doneSubtasks = task.subtasks.filter((subtask) => subtask.done).length
 
   return (
-    <li className="flex items-start gap-3 rounded-xl bg-white p-3 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+    <li
+      ref={rootRef}
+      style={rootStyle}
+      className={cn(
+        'flex items-start gap-3 rounded-xl bg-white p-3 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800',
+        isDragging && 'shadow-xl ring-2 ring-brand-500',
+      )}
+    >
+      {handle}
       <input
         id={checkboxId}
         type="checkbox"

@@ -51,7 +51,7 @@ export function UndoProvider({ children }: { children: ReactNode }) {
                 pending.onUndo()
                 setPending(null)
               }}
-              className="text-brand-100 hover:bg-white/10 hover:text-white dark:text-brand-700 dark:hover:bg-slate-900/10 dark:hover:text-brand-700"
+              className="text-brand-100! hover:bg-white/10 hover:text-white! dark:text-brand-700! dark:hover:bg-slate-900/10 dark:hover:text-brand-700!"
             >
               Deshacer
             </Button>
