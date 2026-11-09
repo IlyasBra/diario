@@ -4,11 +4,12 @@ import { AppShell } from '@/components/layout/AppShell'
 import { MainNav } from '@/components/layout/MainNav'
 import { Button } from '@/components/ui/Button'
 import { EmptyState } from '@/components/ui/EmptyState'
-import { ArchiveIcon, PlusIcon } from '@/components/ui/icons'
+import { PlusIcon, SettingsIcon } from '@/components/ui/icons'
 import { Notice } from '@/components/ui/Notice'
-import { BackupDialog } from '@/features/backup/components/BackupDialog'
 import { InAppAlerts } from '@/features/notifications/components/InAppAlerts'
 import { NotificationPrompt } from '@/features/notifications/components/NotificationPrompt'
+import { SettingsDialog } from '@/features/settings/components/SettingsDialog'
+import { useTheme } from '@/features/settings/useTheme'
 import { useAlertScheduler } from '@/features/notifications/useAlertScheduler'
 import {
   ReminderEditorDialog,
@@ -48,7 +49,8 @@ export function MainScreen({ today, isPersistent }: MainScreenProps) {
   const reminders = useReminders()
   const [taskEditor, setTaskEditor] = useState<TaskEditorState | null>(null)
   const [reminderEditor, setReminderEditor] = useState<ReminderEditorState | null>(null)
-  const [backupOpen, setBackupOpen] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(false)
+  const theme = useTheme()
   const isStoragePersistent = usePersistentStorage()
 
   useScrollToTopOnRouteChange(route)
@@ -91,12 +93,12 @@ export function MainScreen({ today, isPersistent }: MainScreenProps) {
           variant="ghost"
           size="icon"
           onClick={() => {
-            setBackupOpen(true)
+            setSettingsOpen(true)
           }}
           className="-mr-2"
         >
-          <ArchiveIcon />
-          <span className="sr-only">Copia de seguridad</span>
+          <SettingsIcon />
+          <span className="sr-only">Ajustes</span>
         </Button>
       }
     >
@@ -152,11 +154,12 @@ export function MainScreen({ today, isPersistent }: MainScreenProps) {
 
       <InAppAlerts alerts={inAppAlerts} onDismiss={dismissAlert} />
 
-      <BackupDialog
-        open={backupOpen}
+      <SettingsDialog
+        open={settingsOpen}
         onClose={() => {
-          setBackupOpen(false)
+          setSettingsOpen(false)
         }}
+        theme={{ preference: theme.preference, onChange: theme.setPreference }}
         isStoragePersistent={isStoragePersistent}
       />
       <TaskEditorDialog

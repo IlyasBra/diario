@@ -20,6 +20,22 @@ if (!('showModal' in HTMLDialogElement.prototype)) {
   })
 }
 
+// jsdom does not implement matchMedia. Minimal stand-in: nothing ever matches.
+if (typeof window.matchMedia !== 'function') {
+  Object.assign(window, {
+    matchMedia: (query: string): MediaQueryList =>
+      ({
+        matches: false,
+        media: query,
+        addEventListener: () => undefined,
+        removeEventListener: () => undefined,
+      }) as unknown as MediaQueryList,
+  })
+}
+
 afterEach(() => {
   cleanup()
+  // Preferences are stored in localStorage; keep tests independent.
+  window.localStorage.clear()
+  document.documentElement.classList.remove('dark')
 })

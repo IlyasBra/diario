@@ -1,18 +1,20 @@
 import { type ChangeEvent, useState } from 'react'
 
 import { Button } from '@/components/ui/Button'
-import { Dialog } from '@/components/ui/Dialog'
 import { Notice } from '@/components/ui/Notice'
 import { useReminders } from '@/features/reminders/state/useReminders'
 import { useTasks } from '@/features/tasks/state/useTasks'
 import { downloadTextFile } from '@/lib/download'
 import { pluralize } from '@/lib/text'
 
-import { type BackupFile, backupFileName, createBackup, parseBackup } from '../backup'
+import {
+  type BackupFile,
+  backupFileName,
+  createBackup,
+  parseBackup,
+} from '@/features/backup/backup'
 
-interface BackupDialogProps {
-  open: boolean
-  onClose: () => void
+interface BackupSectionProps {
   /** Whether the browser promised not to evict the data (null = unknown). */
   isStoragePersistent: boolean | null
 }
@@ -23,17 +25,11 @@ interface Feedback {
 }
 
 /** Export/import of all data as a JSON file: the user's own safety net. */
-export function BackupDialog({ open, onClose, isStoragePersistent }: BackupDialogProps) {
+export function BackupSection({ isStoragePersistent }: BackupSectionProps) {
   const { tasks, replaceTasks } = useTasks()
   const { reminders, replaceReminders } = useReminders()
   const [pending, setPending] = useState<BackupFile | null>(null)
   const [feedback, setFeedback] = useState<Feedback | null>(null)
-
-  const close = () => {
-    setPending(null)
-    setFeedback(null)
-    onClose()
-  }
 
   const exportBackup = () => {
     const now = new Date()
@@ -69,10 +65,13 @@ export function BackupDialog({ open, onClose, isStoragePersistent }: BackupDialo
   }
 
   return (
-    <Dialog open={open} onClose={close} title="Copia de seguridad">
+    <section aria-labelledby="backup-heading" className="space-y-4">
+      <h3 id="backup-heading" className="text-base font-semibold">
+        Copia de seguridad
+      </h3>
       <div className="space-y-6">
         <section className="space-y-2">
-          <h3 className="font-medium">Guardar copia</h3>
+          <h4 className="font-medium">Guardar copia</h4>
           <p className="text-sm text-slate-600 dark:text-slate-400">
             Descarga un archivo con tus {pluralize(tasks.length, 'tarea', 'tareas')} y{' '}
             {pluralize(reminders.length, 'recordatorio', 'recordatorios')}. Hazlo de vez en cuando:
@@ -84,7 +83,7 @@ export function BackupDialog({ open, onClose, isStoragePersistent }: BackupDialo
         </section>
 
         <section className="space-y-2">
-          <h3 className="font-medium">Restaurar copia</h3>
+          <h4 className="font-medium">Restaurar copia</h4>
           <p className="text-sm text-slate-600 dark:text-slate-400">
             Elige un archivo guardado antes. Sustituirá lo que hay ahora en la app.
           </p>
@@ -135,6 +134,6 @@ export function BackupDialog({ open, onClose, isStoragePersistent }: BackupDialo
             : 'El navegador podría borrar los datos si falta espacio. Instala la app en la pantalla de inicio y guarda copias.'}
         </p>
       </div>
-    </Dialog>
+    </section>
   )
 }

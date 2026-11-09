@@ -9,7 +9,7 @@ import { InMemoryTaskRepository } from '@/features/tasks/data/inMemoryTaskReposi
 import { TasksProvider } from '@/features/tasks/state/TasksProvider'
 import { makeReminder, makeTask } from '@/test/factories'
 
-import { createBackup } from '../backup'
+import { createBackup } from '@/features/backup/backup'
 
 const TODAY = '2026-11-08'
 
@@ -30,7 +30,7 @@ function backupFile(content: string) {
   return new File([content], 'copia.json', { type: 'application/json' })
 }
 
-describe('BackupDialog', () => {
+describe('SettingsDialog', () => {
   const createObjectURL = vi.fn(() => 'blob:fake')
 
   beforeEach(() => {
@@ -47,8 +47,8 @@ describe('BackupDialog', () => {
   })
 
   async function openDialog(user: ReturnType<typeof userEvent.setup>) {
-    await user.click(await screen.findByRole('button', { name: 'Copia de seguridad' }))
-    return screen.getByRole('dialog', { name: 'Copia de seguridad' })
+    await user.click(await screen.findByRole('button', { name: 'Ajustes' }))
+    return screen.getByRole('dialog', { name: 'Ajustes' })
   }
 
   it('downloads a backup with the current data', async () => {
@@ -90,5 +90,22 @@ describe('BackupDialog', () => {
       'Este archivo no es una copia de seguridad de Diario.',
     )
     expect(await taskRepository.list()).toMatchObject([{ title: 'Tarea actual' }])
+  })
+})
+
+describe('theme setting', () => {
+  it('switches to dark mode and remembers it', async () => {
+    window.location.hash = ''
+    const { user } = renderApp()
+
+    await user.click(await screen.findByRole('button', { name: 'Ajustes' }))
+    const dialog = screen.getByRole('dialog', { name: 'Ajustes' })
+    await user.click(within(dialog).getByRole('radio', { name: 'Oscuro' }))
+
+    expect(document.documentElement).toHaveClass('dark')
+    expect(window.localStorage.getItem('diario:theme')).toBe('"dark"')
+
+    await user.click(within(dialog).getByRole('radio', { name: 'Claro' }))
+    expect(document.documentElement).not.toHaveClass('dark')
   })
 })
