@@ -4,13 +4,50 @@ import { fileURLToPath, URL } from 'node:url'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
+import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vite.dev/config/
 export default defineConfig({
   // GitHub Pages serves the app from /<repo-name>/, so the base path is
   // configurable. Locally it defaults to "/".
   base: process.env.VITE_BASE_PATH ?? '/',
-  plugins: [react(), tailwindcss()],
+  plugins: [
+    react(),
+    tailwindcss(),
+    VitePWA({
+      // The app registers the worker itself (src/pwa.ts) so failures can be handled.
+      injectRegister: false,
+      registerType: 'autoUpdate',
+      includeAssets: ['favicon.svg', 'icons/apple-touch-icon.png'],
+      manifest: {
+        name: 'Diario',
+        short_name: 'Diario',
+        description: 'Organiza tus tareas del día y tus recordatorios.',
+        lang: 'es',
+        display: 'standalone',
+        orientation: 'portrait',
+        background_color: '#f8fafc',
+        theme_color: '#4f46e5',
+        // start_url and scope default to the configured base path.
+        icons: [
+          { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+          { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+          {
+            src: 'icons/maskable-512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable',
+          },
+        ],
+      },
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
+        // Single page app: any navigation falls back to the cached shell, so it opens offline.
+        navigateFallback: 'index.html',
+        cleanupOutdatedCaches: true,
+      },
+    }),
+  ],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
