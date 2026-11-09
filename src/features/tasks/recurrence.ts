@@ -101,3 +101,8 @@ export function describeRepeat(task: Pick<Task, 'repeat'>): string {
     }
   }
 }
+
+/** First day on or after `from` (within a year) on which the task occurs. */
+export function nextOccurrence(task: Task, from: ISODate): ISODate | null {
+  return occurrenceDates(task, from, addDaysToISODate(from, 366))[0] ?? null
+}

@@ -4,8 +4,11 @@ import { AppShell } from '@/components/layout/AppShell'
 import { MainNav } from '@/components/layout/MainNav'
 import { Button } from '@/components/ui/Button'
 import { EmptyState } from '@/components/ui/EmptyState'
-import { PlusIcon, SettingsIcon } from '@/components/ui/icons'
+import { PlusIcon, SearchIcon, SettingsIcon } from '@/components/ui/icons'
 import { Notice } from '@/components/ui/Notice'
+import { FilterBar } from '@/features/search/components/FilterBar'
+import { SearchView } from '@/features/search/components/SearchView'
+import { EMPTY_FILTER, isFilterActive, type TaskFilter } from '@/features/search/filters'
 import { InAppAlerts } from '@/features/notifications/components/InAppAlerts'
 import { NotificationPrompt } from '@/features/notifications/components/NotificationPrompt'
 import { SettingsDialog } from '@/features/settings/components/SettingsDialog'
@@ -37,6 +40,7 @@ const CREATE_LABELS: Record<Route, string> = {
   hoy: 'Nueva tarea',
   proximos: 'Nueva tarea',
   recordatorios: 'Nuevo recordatorio',
+  buscar: 'Nueva tarea',
 }
 
 interface MainScreenProps {
@@ -52,6 +56,7 @@ export function MainScreen({ today, isPersistent }: MainScreenProps) {
   const [taskEditor, setTaskEditor] = useState<TaskEditorState | null>(null)
   const [reminderEditor, setReminderEditor] = useState<ReminderEditorState | null>(null)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [filter, setFilter] = useState<TaskFilter>(EMPTY_FILTER)
   const theme = useTheme()
   const isStoragePersistent = usePersistentStorage()
 
@@ -76,7 +81,7 @@ export function MainScreen({ today, isPersistent }: MainScreenProps) {
     else
       setTaskEditor({
         mode: 'create',
-        date: route === 'hoy' ? today : addDaysToISODate(today, 1),
+        date: route === 'proximos' ? addDaysToISODate(today, 1) : today,
       })
   }, [route, today])
   const editTask = useCallback((task: Task) => {
@@ -91,17 +96,27 @@ export function MainScreen({ today, isPersistent }: MainScreenProps) {
       today={today}
       nav={<MainNav items={NAV_ITEMS} currentId={route} />}
       headerActions={
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => {
-            setSettingsOpen(true)
-          }}
-          className="-mr-2"
-        >
-          <SettingsIcon />
-          <span className="sr-only">Ajustes</span>
-        </Button>
+        <>
+          <a
+            href="#buscar"
+            aria-current={route === 'buscar' ? 'page' : undefined}
+            className="inline-flex size-11 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+          >
+            <SearchIcon />
+            <span className="sr-only">Buscar</span>
+          </a>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => {
+              setSettingsOpen(true)
+            }}
+            className="-mr-2"
+          >
+            <SettingsIcon />
+            <span className="sr-only">Ajustes</span>
+          </Button>
+        </>
       }
     >
       <div className="mb-6 space-y-3 empty:hidden">
@@ -131,9 +146,24 @@ export function MainScreen({ today, isPersistent }: MainScreenProps) {
       )}
       {status === 'ready' && (
         <>
-          {route === 'hoy' && <TodayView today={today} onCreate={openCreate} onEdit={editTask} />}
+          {(route === 'hoy' || route === 'proximos') && (
+            <details className="mb-6 rounded-xl ring-1 ring-slate-200 dark:ring-slate-800">
+              <summary className="flex min-h-11 cursor-pointer items-center px-3 text-sm font-medium">
+                Filtros{isFilterActive(filter) ? ' (activos)' : ''}
+              </summary>
+              <div className="px-3 pb-3">
+                <FilterBar filter={filter} onChange={setFilter} />
+              </div>
+            </details>
+          )}
+          {route === 'hoy' && (
+            <TodayView today={today} onCreate={openCreate} onEdit={editTask} filter={filter} />
+          )}
           {route === 'proximos' && (
-            <UpcomingView today={today} onCreate={openCreate} onEdit={editTask} />
+            <UpcomingView today={today} onCreate={openCreate} onEdit={editTask} filter={filter} />
+          )}
+          {route === 'buscar' && (
+            <SearchView today={today} onEditTask={editTask} onEditReminder={editReminder} />
           )}
           {route === 'recordatorios' && (
             <RemindersView

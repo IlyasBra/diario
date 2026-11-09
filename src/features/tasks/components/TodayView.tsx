@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/Button'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { PlusIcon } from '@/components/ui/icons'
+import { filterTasks, isFilterActive, type TaskFilter } from '@/features/search/filters'
 import { type ISODate } from '@/lib/dates'
 
 import { selectTodayTasks, summarizeDay } from '../selectors'
@@ -14,12 +15,13 @@ interface TodayViewProps {
   today: ISODate
   onCreate: () => void
   onEdit: (task: Task) => void
+  filter: TaskFilter
 }
 
-export function TodayView({ today, onCreate, onEdit }: TodayViewProps) {
+export function TodayView({ today, onCreate, onEdit, filter }: TodayViewProps) {
   const { tasks } = useTasks()
   const actions = useTaskItemActions(today, onEdit)
-  const { overdue, today: todayTasks } = selectTodayTasks(tasks, today)
+  const { overdue, today: todayTasks } = selectTodayTasks(filterTasks(tasks, filter), today)
 
   return (
     <div className="space-y-6">
@@ -32,6 +34,13 @@ export function TodayView({ today, onCreate, onEdit }: TodayViewProps) {
 
       {todayTasks.length > 0 ? (
         <TaskSection title="Hoy" tasks={todayTasks} today={today} {...actions} />
+      ) : isFilterActive(filter) ? (
+        overdue.length === 0 && (
+          <EmptyState
+            title="Ninguna tarea de hoy coincide con los filtros"
+            description="Quita los filtros para ver todas."
+          />
+        )
       ) : (
         <EmptyState
           title="Nada planeado para hoy"
