@@ -62,7 +62,12 @@ test.describe('dragging', () => {
     await expect(page.getByLabel('Regar las plantas')).toBeHidden()
 
     await page.getByRole('button', { name: 'Deshacer' }).click()
-    await expect(page.getByLabel('Regar las plantas')).toBeVisible()
+    try {
+      await expect(page.getByLabel('Regar las plantas')).toBeVisible()
+    } catch (error) {
+      console.log('DEBUG body:', await page.locator('body').innerText())
+      throw error
+    }
   })
 })
 
