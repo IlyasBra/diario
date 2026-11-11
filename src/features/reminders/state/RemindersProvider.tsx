@@ -1,17 +1,11 @@
 import { type ReactNode, useMemo } from 'react'
 
 import { type StoreErrorMessages, useRepositoryStore } from '@/hooks/useRepositoryStore'
+import { useI18n } from '@/i18n'
 
 import { type ReminderRepository } from '../data/reminderRepository'
 import { reminderModel } from '../model'
 import { RemindersContext, type RemindersContextValue } from './RemindersContext'
-
-const ERROR_MESSAGES: StoreErrorMessages = {
-  create: 'No se ha podido crear el recordatorio.',
-  update: 'No se ha podido guardar el recordatorio.',
-  remove: 'No se ha podido borrar el recordatorio.',
-  replace: 'No se han podido restaurar los recordatorios.',
-}
 
 interface RemindersProviderProps {
   repository: ReminderRepository
@@ -19,7 +13,17 @@ interface RemindersProviderProps {
 }
 
 export function RemindersProvider({ repository, children }: RemindersProviderProps) {
-  const store = useRepositoryStore(repository, reminderModel, ERROR_MESSAGES)
+  const { t } = useI18n()
+  const messages = useMemo<StoreErrorMessages>(
+    () => ({
+      create: t('store.reminder.create'),
+      update: t('store.reminder.update'),
+      remove: t('store.reminder.remove'),
+      replace: t('store.reminder.replace'),
+    }),
+    [t],
+  )
+  const store = useRepositoryStore(repository, reminderModel, messages)
 
   const value = useMemo<RemindersContextValue>(
     () => ({

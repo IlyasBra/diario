@@ -1,23 +1,27 @@
 import { addMonths, getDay } from 'date-fns'
 
-import { addDaysToISODate, type ISODate, parseISODate, toISODate } from '@/lib/dates'
+import { t } from '@/i18n'
+import {
+  addDaysToISODate,
+  formatList,
+  formatWeekday,
+  type ISODate,
+  parseISODate,
+  toISODate,
+} from '@/lib/dates'
 
 import { type Task, type WeekdayIndex } from './types'
 
-export const WEEKDAY_LABELS = [
-  'lunes',
-  'martes',
-  'miércoles',
-  'jueves',
-  'viernes',
-  'sábado',
-  'domingo',
-] as const
-
-/** One letter per weekday, Monday first ("X" for miércoles, as in Spanish calendars). */
-export const WEEKDAY_INITIALS = ['L', 'M', 'X', 'J', 'V', 'S', 'D'] as const
-
 export const WEEKDAYS: readonly WeekdayIndex[] = [0, 1, 2, 3, 4, 5, 6]
+
+/** Name of a weekday (0 = Monday) in the current language: "lunes", "lun." or "L". */
+export function weekdayName(
+  day: WeekdayIndex,
+  width: 'long' | 'short' | 'narrow' = 'long',
+): string {
+  // 2024-01-01 was a Monday.
+  return formatWeekday(new Date(2024, 0, 1 + day), width)
+}
 
 export function isRecurring(task: Task): boolean {
   return task.repeat.kind !== 'none'
@@ -80,24 +84,20 @@ export function toggleDoneDate(doneDates: readonly ISODate[], date: ISODate): IS
     : [...doneDates, date].sort()
 }
 
-/** "Cada día", "Cada semana: lunes y jueves", "Cada mes". */
+/** "Cada día", "Cada lunes y jueves", "Cada mes" (in the current language). */
 export function describeRepeat(task: Pick<Task, 'repeat'>): string {
   const { repeat } = task
   switch (repeat.kind) {
     case 'none':
-      return 'No se repite'
+      return t('repeat.none')
     case 'daily':
-      return 'Cada día'
+      return t('repeat.daily')
     case 'monthly':
-      return 'Cada mes'
+      return t('repeat.monthly')
     case 'weekly': {
-      const names = [...repeat.days].sort().map((day) => WEEKDAY_LABELS[day])
-      if (names.length === 7) return 'Cada día'
-      const list =
-        names.length > 1
-          ? `${names.slice(0, -1).join(', ')} y ${names.at(-1) ?? ''}`
-          : (names[0] ?? '')
-      return `Cada ${list}`
+      if (repeat.days.length === 7) return t('repeat.daily')
+      const names = [...repeat.days].sort().map((day) => weekdayName(day))
+      return t('repeat.weeklyOn', { days: formatList(names) })
     }
   }
 }

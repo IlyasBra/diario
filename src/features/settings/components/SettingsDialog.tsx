@@ -1,9 +1,11 @@
 import { Dialog } from '@/components/ui/Dialog'
 
 import { TagsSection } from '@/features/tags/components/TagsSection'
+import { useI18n } from '@/i18n'
 
 import { type ThemePreference } from '../theme'
 import { BackupSection } from './BackupSection'
+import { LanguageSection } from './LanguageSection'
 import { ThemeSection } from './ThemeSection'
 
 interface SettingsDialogProps {
@@ -15,10 +17,12 @@ interface SettingsDialogProps {
 }
 
 export function SettingsDialog({ open, onClose, theme, isStoragePersistent }: SettingsDialogProps) {
+  const { t } = useI18n()
   return (
-    <Dialog open={open} onClose={onClose} title="Ajustes">
+    <Dialog open={open} onClose={onClose} title={t('settings.title')}>
       <div className="space-y-8">
         <ThemeSection preference={theme.preference} onChange={theme.onChange} />
+        <LanguageSection />
         <TagsSection />
         <BackupSection isStoragePersistent={isStoragePersistent} />
       </div>

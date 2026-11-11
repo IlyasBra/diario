@@ -1,5 +1,7 @@
+import { t } from '@/i18n'
 import { type EntityModel } from '@/lib/data/repository'
 
+import { tagDisplayName } from './names'
 import { type Tag, type TagChanges, type TagInput, TAG_COLORS } from './types'
 
 export const TAG_NAME_MAX_LENGTH = 24
@@ -36,11 +38,11 @@ export interface TagInputErrors {
 /** `existing` are the other tags, to reject duplicated names (ignoring case). */
 export function validateTagInput(input: TagInput, existing: readonly Tag[]): TagInputErrors {
   const name = input.name.trim()
-  if (name.length === 0) return { name: 'Escribe un nombre.' }
+  if (name.length === 0) return { name: t('error.tagNameRequired') }
   if (name.length > TAG_NAME_MAX_LENGTH)
-    return { name: `El nombre no puede superar ${TAG_NAME_MAX_LENGTH} caracteres.` }
-  if (existing.some((tag) => tag.name.toLowerCase() === name.toLowerCase()))
-    return { name: 'Ya existe una etiqueta con ese nombre.' }
+    return { name: t('error.tagNameTooLong', { max: TAG_NAME_MAX_LENGTH }) }
+  if (existing.some((tag) => tagDisplayName(tag).toLowerCase() === name.toLowerCase()))
+    return { name: t('error.tagDuplicate') }
   return {}
 }
 

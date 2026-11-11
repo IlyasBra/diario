@@ -1,3 +1,4 @@
+import { t } from '@/i18n'
 import { type EntityModel } from '@/lib/data/repository'
 import { isISODate, isTimeString } from '@/lib/dates'
 
@@ -54,12 +55,12 @@ export function validateReminderInput(input: ReminderInput): ReminderInputErrors
   const errors: ReminderInputErrors = {}
   const title = input.title.trim()
 
-  if (title.length === 0) errors.title = 'Escribe un título.'
+  if (title.length === 0) errors.title = t('error.titleRequired')
   else if (title.length > TITLE_MAX_LENGTH)
-    errors.title = `El título no puede superar ${TITLE_MAX_LENGTH} caracteres.`
+    errors.title = t('error.titleTooLong', { max: TITLE_MAX_LENGTH })
 
-  if (!isISODate(input.date)) errors.date = 'Elige una fecha.'
-  if (!isTimeString(input.time)) errors.time = 'Elige una hora.'
+  if (!isISODate(input.date)) errors.date = t('error.dateRequired')
+  if (!isTimeString(input.time)) errors.time = t('error.timeRequired')
 
   return errors
 }

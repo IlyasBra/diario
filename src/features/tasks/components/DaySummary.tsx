@@ -1,4 +1,4 @@
-import { pluralize } from '@/lib/text'
+import { useI18n } from '@/i18n'
 
 import { type DaySummary as DaySummaryData } from '../selectors'
 
@@ -7,6 +7,7 @@ interface DaySummaryProps {
 }
 
 export function DaySummary({ summary }: DaySummaryProps) {
+  const { t, tn } = useI18n()
   const { total, completed, overdue } = summary
   const progress = total === 0 ? 0 : Math.round((completed / total) * 100)
 
@@ -14,18 +15,21 @@ export function DaySummary({ summary }: DaySummaryProps) {
     <div className="rounded-2xl bg-brand-600 p-4 text-white shadow-sm">
       <p className="text-lg font-medium" aria-live="polite">
         {total === 0
-          ? 'No tienes tareas para hoy.'
-          : `Hoy tienes ${pluralize(total, 'tarea', 'tareas')}, ${pluralize(completed, 'completada', 'completadas')}.`}
+          ? t('summary.none')
+          : t('summary.today', {
+              tasks: tn('count.tasks', total),
+              completed: tn('count.completed', completed),
+            })}
       </p>
       {overdue > 0 && (
         <p className="mt-0.5 text-sm text-brand-100">
-          Y {pluralize(overdue, 'tarea atrasada', 'tareas atrasadas')} de días anteriores.
+          {t('summary.overdue', { overdue: tn('count.overdue', overdue) })}
         </p>
       )}
       {total > 0 && (
         <div
           role="progressbar"
-          aria-label="Progreso de hoy"
+          aria-label={t('summary.progress')}
           aria-valuemin={0}
           aria-valuemax={100}
           aria-valuenow={progress}

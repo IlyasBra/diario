@@ -1,17 +1,11 @@
 import { type ReactNode, useMemo } from 'react'
 
 import { type StoreErrorMessages, useRepositoryStore } from '@/hooks/useRepositoryStore'
+import { useI18n } from '@/i18n'
 
 import { type TaskRepository } from '../data/taskRepository'
 import { taskModel } from '../model'
 import { TasksContext, type TasksContextValue } from './TasksContext'
-
-const ERROR_MESSAGES: StoreErrorMessages = {
-  create: 'No se ha podido crear la tarea.',
-  update: 'No se ha podido guardar la tarea.',
-  remove: 'No se ha podido borrar la tarea.',
-  replace: 'No se han podido restaurar las tareas.',
-}
 
 interface TasksProviderProps {
   /** Injected so tests (or a future backend) can provide their own. */
@@ -21,7 +15,17 @@ interface TasksProviderProps {
 
 /** Makes the task list and its actions available through useTasks(). */
 export function TasksProvider({ repository, children }: TasksProviderProps) {
-  const store = useRepositoryStore(repository, taskModel, ERROR_MESSAGES)
+  const { t } = useI18n()
+  const messages = useMemo<StoreErrorMessages>(
+    () => ({
+      create: t('store.task.create'),
+      update: t('store.task.update'),
+      remove: t('store.task.remove'),
+      replace: t('store.task.replace'),
+    }),
+    [t],
+  )
+  const store = useRepositoryStore(repository, taskModel, messages)
 
   const value = useMemo<TasksContextValue>(
     () => ({

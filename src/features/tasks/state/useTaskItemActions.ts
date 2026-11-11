@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 
 import { useUndo } from '@/features/undo/useUndo'
+import { useI18n } from '@/i18n'
 import { addDaysToISODate, type ISODate } from '@/lib/dates'
 
 import { type TaskItemActions } from '../components/TaskItem'
@@ -17,6 +18,7 @@ import { useTasks } from './useTasks'
 export function useTaskItemActions(today: ISODate, onEdit: (task: Task) => void): TaskItemActions {
   const { tasks, updateTask } = useTasks()
   const { showUndo } = useUndo()
+  const { t } = useI18n()
 
   return useMemo(() => {
     const stored = (task: Task) => tasks.find((candidate) => candidate.id === task.id) ?? task
@@ -28,14 +30,14 @@ export function useTaskItemActions(today: ISODate, onEdit: (task: Task) => void)
           const completing = !original.doneDates.includes(task.date)
           void updateTask(original.id, { doneDates: toggleDoneDate(original.doneDates, task.date) })
           if (completing) {
-            showUndo('Tarea completada', () => {
+            showUndo(t('task.completed'), () => {
               void updateTask(original.id, { doneDates: original.doneDates })
             })
           }
         } else {
           void updateTask(original.id, { completed: !original.completed })
           if (!original.completed) {
-            showUndo('Tarea completada', () => {
+            showUndo(t('task.completed'), () => {
               void updateTask(original.id, { completed: false })
             })
           }
@@ -54,5 +56,5 @@ export function useTaskItemActions(today: ISODate, onEdit: (task: Task) => void)
         onEdit(stored(task))
       },
     }
-  }, [tasks, today, onEdit, updateTask, showUndo])
+  }, [tasks, today, onEdit, updateTask, showUndo, t])
 }

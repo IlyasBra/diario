@@ -1,6 +1,8 @@
+import { useI18n } from '@/i18n'
 import { cn } from '@/lib/cn'
 
 import { TAG_COLOR_CLASSES } from '../colors'
+import { tagDisplayName } from '../names'
 import { useTags } from '../state/useTags'
 
 interface TagBadgeProps {
@@ -9,6 +11,7 @@ interface TagBadgeProps {
 
 /** Small coloured label with the tag's name; a neutral one if the tag is gone. */
 export function TagBadge({ tagId }: TagBadgeProps) {
+  const { t } = useI18n()
   const { tags } = useTags()
   const tag = tags.find((candidate) => candidate.id === tagId)
   const colors = TAG_COLOR_CLASSES[tag?.color ?? 'slate']
@@ -20,7 +23,7 @@ export function TagBadge({ tagId }: TagBadgeProps) {
         colors.badge,
       )}
     >
-      {tag?.name ?? 'Sin etiqueta'}
+      {tag ? tagDisplayName(tag) : t('form.noTag')}
     </span>
   )
 }

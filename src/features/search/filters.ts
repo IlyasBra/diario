@@ -1,4 +1,5 @@
 import { type Reminder } from '@/features/reminders/types'
+import { tagDisplayName } from '@/features/tags/names'
 import { type Tag } from '@/features/tags/types'
 import { type Priority, type Task } from '@/features/tasks/types'
 import { matchesQuery } from '@/lib/text'
@@ -25,7 +26,8 @@ export function filterTasks(tasks: readonly Task[], filter: TaskFilter): Task[] 
 
 /** Looks in the title, note, checklist and tag name. */
 export function taskMatchesQuery(task: Task, query: string, tags: readonly Tag[]): boolean {
-  const tagName = tags.find((tag) => tag.id === task.tag)?.name ?? ''
+  const tag = tags.find((candidate) => candidate.id === task.tag)
+  const tagName = tag ? tagDisplayName(tag) : ''
   const text = [task.title, task.note, tagName, ...task.subtasks.map((s) => s.title)].join(' ')
   return matchesQuery(text, query)
 }

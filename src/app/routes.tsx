@@ -1,4 +1,5 @@
 import { type NavItem } from '@/components/layout/MainNav'
+import { type MessageKey } from '@/i18n'
 import { BellIcon, CalendarIcon, ChartIcon, ListIcon, SunIcon } from '@/components/ui/icons'
 
 /** Hash routes. The values appear in the URL, so they are in Spanish. */
@@ -15,10 +16,12 @@ export type Route = (typeof ROUTES)[number]
 export const DEFAULT_ROUTE: Route = 'hoy'
 
 /** Sections shown in the bottom bar. "buscar" is reached from the header. */
-export const NAV_ITEMS: NavItem[] = [
-  { id: 'hoy', label: 'Hoy', href: '#hoy', icon: <SunIcon /> },
-  { id: 'proximos', label: 'Próximos', href: '#proximos', icon: <ListIcon /> },
-  { id: 'calendario', label: 'Calendario', href: '#calendario', icon: <CalendarIcon /> },
-  { id: 'recordatorios', label: 'Avisos', href: '#recordatorios', icon: <BellIcon /> },
-  { id: 'resumen', label: 'Resumen', href: '#resumen', icon: <ChartIcon /> },
-]
+export function navItems(t: (key: MessageKey) => string): NavItem[] {
+  return [
+    { id: 'hoy', label: t('nav.today'), href: '#hoy', icon: <SunIcon /> },
+    { id: 'proximos', label: t('nav.upcoming'), href: '#proximos', icon: <ListIcon /> },
+    { id: 'calendario', label: t('nav.calendar'), href: '#calendario', icon: <CalendarIcon /> },
+    { id: 'recordatorios', label: t('nav.reminders'), href: '#recordatorios', icon: <BellIcon /> },
+    { id: 'resumen', label: t('nav.stats'), href: '#resumen', icon: <ChartIcon /> },
+  ]
+}

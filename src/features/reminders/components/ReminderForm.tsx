@@ -5,14 +5,11 @@ import { Field } from '@/components/ui/Field'
 import { type SegmentedOption, SegmentedControl } from '@/components/ui/SegmentedControl'
 import { inputClassName } from '@/components/ui/styles'
 
-import { REPEAT_LABELS } from '../labels'
+import { useI18n } from '@/i18n'
+
+import { repeatLabel } from '../labels'
 import { NOTE_MAX_LENGTH, TITLE_MAX_LENGTH, validateReminderInput } from '../model'
 import { REPEATS, type Repeat, type ReminderInput } from '../types'
-
-const REPEAT_OPTIONS: SegmentedOption<Repeat>[] = REPEATS.map((repeat) => ({
-  value: repeat,
-  label: repeat === 'none' ? 'No' : REPEAT_LABELS[repeat],
-}))
 
 interface ReminderFormProps {
   initialValues: ReminderInput
@@ -31,6 +28,11 @@ export function ReminderForm({
   onCancel,
   secondaryAction,
 }: ReminderFormProps) {
+  const { t } = useI18n()
+  const repeatOptions: SegmentedOption<Repeat>[] = REPEATS.map((repeat) => ({
+    value: repeat,
+    label: repeat === 'none' ? t('repeat.no') : repeatLabel(repeat),
+  }))
   const [values, setValues] = useState<ReminderInput>(initialValues)
   const [showErrors, setShowErrors] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
@@ -71,7 +73,12 @@ export function ReminderForm({
 
   return (
     <form noValidate onSubmit={(event) => void handleSubmit(event)} className="space-y-4">
-      <Field label="Título" htmlFor={ids.title} errorId={ids.titleError} error={errors.title}>
+      <Field
+        label={t('form.title')}
+        htmlFor={ids.title}
+        errorId={ids.titleError}
+        error={errors.title}
+      >
         <input
           ref={titleRef}
           id={ids.title}
@@ -86,7 +93,7 @@ export function ReminderForm({
           autoFocus={autoFocusTitle}
           autoComplete="off"
           enterKeyHint="done"
-          placeholder="ITV, renovar DNI, cumpleaños…"
+          placeholder={t('reminder.placeholder')}
           aria-invalid={errors.title ? true : undefined}
           aria-describedby={errors.title ? ids.titleError : undefined}
           className={inputClassName}
@@ -94,7 +101,12 @@ export function ReminderForm({
       </Field>
 
       <div className="grid grid-cols-[3fr_2fr] gap-3">
-        <Field label="Fecha" htmlFor={ids.date} errorId={ids.dateError} error={errors.date}>
+        <Field
+          label={t('form.date')}
+          htmlFor={ids.date}
+          errorId={ids.dateError}
+          error={errors.date}
+        >
           <input
             ref={dateRef}
             id={ids.date}
@@ -109,7 +121,12 @@ export function ReminderForm({
             className={inputClassName}
           />
         </Field>
-        <Field label="Hora" htmlFor={ids.time} errorId={ids.timeError} error={errors.time}>
+        <Field
+          label={t('form.time')}
+          htmlFor={ids.time}
+          errorId={ids.timeError}
+          error={errors.time}
+        >
           <input
             ref={timeRef}
             id={ids.time}
@@ -127,15 +144,15 @@ export function ReminderForm({
       </div>
 
       <SegmentedControl
-        legend="Repetir"
-        options={REPEAT_OPTIONS}
+        legend={t('repeat.legendShort')}
+        options={repeatOptions}
         value={values.repeat}
         onChange={(repeat) => {
           update('repeat', repeat)
         }}
       />
 
-      <Field label="Nota (opcional)" htmlFor={ids.note} errorId={`${ids.note}-error`}>
+      <Field label={t('form.note')} htmlFor={ids.note} errorId={`${ids.note}-error`}>
         <textarea
           id={ids.note}
           value={values.note}
@@ -151,7 +168,7 @@ export function ReminderForm({
       <div className="flex items-center gap-2 pt-2">
         {secondaryAction}
         <div className="ml-auto flex gap-2">
-          <Button onClick={onCancel}>Cancelar</Button>
+          <Button onClick={onCancel}>{t('common.cancel')}</Button>
           <Button type="submit" variant="primary" disabled={isSaving}>
             {submitLabel}
           </Button>

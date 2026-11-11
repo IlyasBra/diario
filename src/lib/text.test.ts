@@ -1,13 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { matchesQuery, normalizeText, pluralize } from './text'
-
-describe('pluralize', () => {
-  it('uses the singular only for one', () => {
-    expect(pluralize(1, 'tarea', 'tareas')).toBe('1 tarea')
-    expect(pluralize(0, 'tarea', 'tareas')).toBe('0 tareas')
-  })
-})
+import { matchesQuery, normalizeText } from './text'
 
 describe('normalizeText', () => {
   it('removes accents and lowercases, keeping ñ distinct from n only by NFD rules', () => {

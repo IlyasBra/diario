@@ -3,6 +3,7 @@ import { useRef } from 'react'
 import { Button } from '@/components/ui/Button'
 import { PlusIcon, TrashIcon } from '@/components/ui/icons'
 import { inputClassName } from '@/components/ui/styles'
+import { useI18n } from '@/i18n'
 
 import { newSubtask } from '../model'
 import { type Subtask } from '../types'
@@ -14,6 +15,7 @@ interface SubtasksFieldProps {
 
 /** Editable checklist. Empty items are dropped when the task is saved. */
 export function SubtasksField({ value, onChange }: SubtasksFieldProps) {
+  const { t } = useI18n()
   const lastInputRef = useRef<HTMLInputElement>(null)
 
   function update(id: string, title: string) {
@@ -28,7 +30,7 @@ export function SubtasksField({ value, onChange }: SubtasksFieldProps) {
 
   return (
     <fieldset>
-      <legend className="mb-1.5 block text-sm font-medium">Subtareas (opcional)</legend>
+      <legend className="mb-1.5 block text-sm font-medium">{t('form.subtasks')}</legend>
       <ul className="space-y-2">
         {value.map((subtask, index) => (
           <li key={subtask.id} className="flex gap-2">
@@ -45,7 +47,7 @@ export function SubtasksField({ value, onChange }: SubtasksFieldProps) {
                   add()
                 }
               }}
-              aria-label={`Subtarea ${String(index + 1)}`}
+              aria-label={t('form.subtask', { n: index + 1 })}
               maxLength={120}
               autoComplete="off"
               enterKeyHint="next"
@@ -59,14 +61,14 @@ export function SubtasksField({ value, onChange }: SubtasksFieldProps) {
               }}
             >
               <TrashIcon />
-              <span className="sr-only">Quitar subtarea {index + 1}</span>
+              <span className="sr-only">{t('form.removeSubtask', { n: index + 1 })}</span>
             </Button>
           </li>
         ))}
       </ul>
       <Button size="sm" onClick={add} className="mt-2">
         <PlusIcon className="size-4" />
-        Añadir subtarea
+        {t('form.addSubtask')}
       </Button>
     </fieldset>
   )

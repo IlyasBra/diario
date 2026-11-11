@@ -3,12 +3,13 @@ import { type CSSProperties, type ReactNode, type Ref, useId } from 'react'
 import { Badge, type BadgeTone } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { ArrowRightIcon, ClockIcon, PencilIcon, RepeatIcon } from '@/components/ui/icons'
+import { useI18n } from '@/i18n'
 import { cn } from '@/lib/cn'
 import { formatShortDate, type ISODate } from '@/lib/dates'
 
 import { TagBadge } from '@/features/tags/components/TagBadge'
 
-import { PRIORITY_LABELS } from '../labels'
+import { priorityLabel } from '../labels'
 import { describeRepeat, isRecurring } from '../recurrence'
 import { isOverdue } from '../selectors'
 import { type Priority, type Task } from '../types'
@@ -48,6 +49,7 @@ export function TaskItem({
   rootStyle,
   isDragging = false,
 }: TaskItemProps) {
+  const { t } = useI18n()
   const checkboxId = useId()
   const detailsId = useId()
   const overdue = isOverdue(task, today)
@@ -95,27 +97,31 @@ export function TaskItem({
           <div className="mt-1.5 flex flex-wrap gap-1.5">
             {task.time && (
               <Badge>
-                <ClockIcon className="mr-1 size-3.5" />
-                <span className="sr-only">A las </span>
+                <ClockIcon className="me-1 size-3.5" />
+                <span className="sr-only">{t('task.at')}</span>
                 <time className="tabular-nums">{task.time}</time>
               </Badge>
             )}
             {isRecurring(task) && (
               <Badge tone="info">
-                <RepeatIcon className="mr-1 size-3.5" />
+                <RepeatIcon className="me-1 size-3.5" />
                 {describeRepeat(task)}
               </Badge>
             )}
             {task.subtasks.length > 0 && (
               <Badge>
-                <span className="sr-only">Subtareas hechas: </span>
+                <span className="sr-only">{t('task.subtasksDone')}</span>
                 {doneSubtasks}/{task.subtasks.length}
               </Badge>
             )}
-            {overdue && <Badge tone="danger">Atrasada · {formatShortDate(task.date)}</Badge>}
+            {overdue && (
+              <Badge tone="danger">
+                {t('task.overdueBadge', { date: formatShortDate(task.date) })}
+              </Badge>
+            )}
             <Badge tone={PRIORITY_TONES[task.priority]}>
-              <span className="sr-only">Prioridad </span>
-              {PRIORITY_LABELS[task.priority]}
+              <span className="sr-only">{t('task.priorityPrefix')}</span>
+              {priorityLabel(task.priority)}
             </Badge>
             <TagBadge tagId={task.tag} />
           </div>
@@ -148,7 +154,7 @@ export function TaskItem({
         </div>
       </div>
 
-      <div className="-my-1 -mr-1 flex shrink-0">
+      <div className="-my-1 -me-1 flex shrink-0">
         {canPostpone && (
           <Button
             variant="ghost"
@@ -156,10 +162,10 @@ export function TaskItem({
             onClick={() => {
               onPostpone(task)
             }}
-            title="Pasar a mañana"
+            title={t('task.postpone')}
           >
             <ArrowRightIcon />
-            <span className="sr-only">Pasar «{task.title}» a mañana</span>
+            <span className="sr-only">{t('task.postponeSr', { title: task.title })}</span>
           </Button>
         )}
         <Button
@@ -168,10 +174,10 @@ export function TaskItem({
           onClick={() => {
             onEdit(task)
           }}
-          title="Editar"
+          title={t('task.edit')}
         >
           <PencilIcon />
-          <span className="sr-only">Editar «{task.title}»</span>
+          <span className="sr-only">{t('task.editSr', { title: task.title })}</span>
         </Button>
       </div>
     </li>

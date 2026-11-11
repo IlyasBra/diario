@@ -5,6 +5,7 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import { PlusIcon } from '@/components/ui/icons'
 import { type SegmentedOption, SegmentedControl } from '@/components/ui/SegmentedControl'
 import { useNow } from '@/hooks/useNow'
+import { type MessageKey, useI18n } from '@/i18n'
 import { formatDayHeading, toISODate } from '@/lib/dates'
 
 import {
@@ -19,16 +20,10 @@ import { useReminders } from '../state/useReminders'
 import { type Reminder } from '../types'
 import { ReminderSection } from './ReminderSection'
 
-const RANGE_OPTIONS: SegmentedOption<ReminderRange>[] = [
-  { value: 'week', label: 'Esta semana' },
-  { value: 'month', label: 'Este mes' },
-  { value: 'all', label: 'Todos' },
-]
-
-const EMPTY_MESSAGES: Record<ReminderRange, string> = {
-  week: 'No tienes recordatorios esta semana.',
-  month: 'No tienes recordatorios este mes.',
-  all: 'Todavía no tienes recordatorios.',
+const EMPTY_KEYS: Record<ReminderRange, MessageKey> = {
+  week: 'reminders.emptyWeek',
+  month: 'reminders.emptyMonth',
+  all: 'reminders.emptyAll',
 }
 
 interface RemindersViewProps {
@@ -39,6 +34,12 @@ interface RemindersViewProps {
 }
 
 export function RemindersView({ onCreate, onEdit, banner }: RemindersViewProps) {
+  const { t } = useI18n()
+  const rangeOptions: SegmentedOption<ReminderRange>[] = [
+    { value: 'week', label: t('reminders.week') },
+    { value: 'month', label: t('reminders.month') },
+    { value: 'all', label: t('reminders.all') },
+  ]
   const { reminders } = useReminders()
   const [range, setRange] = useState<ReminderRange>('week')
   const now = useNow()
@@ -55,25 +56,25 @@ export function RemindersView({ onCreate, onEdit, banner }: RemindersViewProps) 
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold tracking-tight">Recordatorios</h1>
+      <h1 className="text-2xl font-semibold tracking-tight">{t('reminders.title')}</h1>
       {banner}
 
       <SegmentedControl
-        legend="Periodo"
+        legend={t('reminders.period')}
         hideLegend
-        options={RANGE_OPTIONS}
+        options={rangeOptions}
         value={range}
         onChange={setRange}
       />
 
       {upcoming.length === 0 && past.length === 0 ? (
         <EmptyState
-          title={EMPTY_MESSAGES[range]}
-          description="Apunta la ITV, renovar el DNI, cumpleaños o pagos y te avisaré a la hora indicada."
+          title={t(EMPTY_KEYS[range])}
+          description={t('reminders.emptyDescription')}
           action={
             <Button variant="primary" onClick={onCreate}>
               <PlusIcon />
-              Añadir recordatorio
+              {t('reminders.add')}
             </Button>
           }
         />
@@ -88,7 +89,12 @@ export function RemindersView({ onCreate, onEdit, banner }: RemindersViewProps) 
             />
           ))}
           {past.length > 0 && (
-            <ReminderSection title="Pasados" occurrences={past} isPast onEdit={onEdit} />
+            <ReminderSection
+              title={t('reminders.past')}
+              occurrences={past}
+              isPast
+              onEdit={onEdit}
+            />
           )}
         </>
       )}

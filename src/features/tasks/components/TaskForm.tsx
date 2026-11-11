@@ -3,7 +3,9 @@ import { type ReactNode, type SubmitEvent, useId, useRef, useState } from 'react
 import { Button } from '@/components/ui/Button'
 import { Field } from '@/components/ui/Field'
 import { inputClassName } from '@/components/ui/styles'
+import { tagDisplayName } from '@/features/tags/names'
 import { useTags } from '@/features/tags/state/useTags'
+import { useI18n } from '@/i18n'
 import { addDaysToISODate, type ISODate } from '@/lib/dates'
 
 import { NOTE_MAX_LENGTH, TITLE_MAX_LENGTH, validateTaskInput } from '../model'
@@ -34,6 +36,7 @@ export function TaskForm({
   onCancel,
   secondaryAction,
 }: TaskFormProps) {
+  const { t } = useI18n()
   const { tags } = useTags()
   const [values, setValues] = useState<TaskInput>(initialValues)
   const [showErrors, setShowErrors] = useState(false)
@@ -79,7 +82,12 @@ export function TaskForm({
 
   return (
     <form noValidate onSubmit={(event) => void handleSubmit(event)} className="space-y-4">
-      <Field label="Título" htmlFor={ids.title} errorId={ids.titleError} error={errors.title}>
+      <Field
+        label={t('form.title')}
+        htmlFor={ids.title}
+        errorId={ids.titleError}
+        error={errors.title}
+      >
         <input
           ref={titleRef}
           id={ids.title}
@@ -96,14 +104,14 @@ export function TaskForm({
           autoFocus={autoFocusTitle}
           autoComplete="off"
           enterKeyHint="done"
-          placeholder="¿Qué tienes que hacer?"
+          placeholder={t('form.taskPlaceholder')}
           aria-invalid={errors.title ? true : undefined}
           aria-describedby={errors.title ? ids.titleError : undefined}
           className={inputClassName}
         />
       </Field>
 
-      <Field label="Nota (opcional)" htmlFor={ids.note} errorId={`${ids.note}-error`}>
+      <Field label={t('form.note')} htmlFor={ids.note} errorId={`${ids.note}-error`}>
         <textarea
           id={ids.note}
           value={values.note}
@@ -117,7 +125,7 @@ export function TaskForm({
       </Field>
 
       <Field
-        label={values.repeat.kind === 'none' ? 'Fecha' : 'Empieza el'}
+        label={values.repeat.kind === 'none' ? t('form.date') : t('form.startsOn')}
         htmlFor={ids.date}
         errorId={ids.dateError}
         error={errors.date}
@@ -144,7 +152,7 @@ export function TaskForm({
             aria-pressed={values.date === today}
             className="aria-pressed:bg-brand-50 aria-pressed:ring-brand-500 dark:aria-pressed:bg-slate-700"
           >
-            Hoy
+            {t('day.today')}
           </Button>
           <Button
             size="md"
@@ -154,12 +162,17 @@ export function TaskForm({
             aria-pressed={values.date === tomorrow}
             className="aria-pressed:bg-brand-50 aria-pressed:ring-brand-500 dark:aria-pressed:bg-slate-700"
           >
-            Mañana
+            {t('day.tomorrow')}
           </Button>
         </div>
       </Field>
 
-      <Field label="Hora (opcional)" htmlFor={ids.time} errorId={ids.timeError} error={errors.time}>
+      <Field
+        label={t('form.timeOptional')}
+        htmlFor={ids.time}
+        errorId={ids.timeError}
+        error={errors.time}
+      >
         <div className="flex gap-2">
           <input
             ref={timeRef}
@@ -179,7 +192,7 @@ export function TaskForm({
                 update('time', null)
               }}
             >
-              Sin hora
+              {t('form.noTime')}
             </Button>
           )}
         </div>
@@ -210,7 +223,7 @@ export function TaskForm({
         }}
       />
 
-      <Field label="Etiqueta" htmlFor={ids.tag} errorId={`${ids.tag}-error`}>
+      <Field label={t('form.tag')} htmlFor={ids.tag} errorId={`${ids.tag}-error`}>
         <select
           id={ids.tag}
           value={values.tag}
@@ -221,12 +234,12 @@ export function TaskForm({
         >
           {tags.map((tag) => (
             <option key={tag.id} value={tag.id}>
-              {tag.name}
+              {tagDisplayName(tag)}
             </option>
           ))}
           {/* Keeps the value valid if the task's tag was deleted. */}
           {!tags.some((tag) => tag.id === values.tag) && (
-            <option value={values.tag}>Sin etiqueta</option>
+            <option value={values.tag}>{t('form.noTag')}</option>
           )}
         </select>
       </Field>
@@ -234,7 +247,7 @@ export function TaskForm({
       <div className="flex items-center gap-2 pt-2">
         {secondaryAction}
         <div className="ml-auto flex gap-2">
-          <Button onClick={onCancel}>Cancelar</Button>
+          <Button onClick={onCancel}>{t('common.cancel')}</Button>
           <Button type="submit" variant="primary" disabled={isSaving}>
             {submitLabel}
           </Button>

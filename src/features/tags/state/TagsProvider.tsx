@@ -1,17 +1,11 @@
 import { type ReactNode, useMemo } from 'react'
 
 import { type StoreErrorMessages, useRepositoryStore } from '@/hooks/useRepositoryStore'
+import { useI18n } from '@/i18n'
 
 import { type TagRepository } from '../data/tagRepository'
 import { tagModel } from '../model'
 import { TagsContext, type TagsContextValue } from './TagsContext'
-
-const ERROR_MESSAGES: StoreErrorMessages = {
-  create: 'No se ha podido crear la etiqueta.',
-  update: 'No se ha podido guardar la etiqueta.',
-  remove: 'No se ha podido borrar la etiqueta.',
-  replace: 'No se han podido restaurar las etiquetas.',
-}
 
 interface TagsProviderProps {
   repository: TagRepository
@@ -19,7 +13,17 @@ interface TagsProviderProps {
 }
 
 export function TagsProvider({ repository, children }: TagsProviderProps) {
-  const store = useRepositoryStore(repository, tagModel, ERROR_MESSAGES)
+  const { t } = useI18n()
+  const messages = useMemo<StoreErrorMessages>(
+    () => ({
+      create: t('store.tag.create'),
+      update: t('store.tag.update'),
+      remove: t('store.tag.remove'),
+      replace: t('store.tag.replace'),
+    }),
+    [t],
+  )
+  const store = useRepositoryStore(repository, tagModel, messages)
 
   const value = useMemo<TagsContextValue>(
     () => ({

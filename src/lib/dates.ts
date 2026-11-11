@@ -1,5 +1,6 @@
 import { addDays, format, isValid, parse } from 'date-fns'
-import { es } from 'date-fns/locale'
+
+import { getLanguage, intlLocale, t } from '@/i18n'
 
 /**
  * A calendar day as "yyyy-MM-dd".
@@ -47,14 +48,51 @@ export function addDaysToISODate(value: ISODate, amount: number): ISODate {
   return toISODate(addDays(parseISODate(value), amount))
 }
 
-/** "sábado, 7 de noviembre" */
-export function formatLongDate(date: Date): string {
-  return format(date, "EEEE, d 'de' MMMM", { locale: es })
+const formatters = new Map<string, Intl.DateTimeFormat>()
+
+/** Intl formatter in the current language; cached because lists format many dates. */
+function dateFormatter(options: Intl.DateTimeFormatOptions): Intl.DateTimeFormat {
+  const locale = intlLocale(getLanguage())
+  const cacheKey = `${locale}|${JSON.stringify(options)}`
+  let formatter = formatters.get(cacheKey)
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat(locale, options)
+    formatters.set(cacheKey, formatter)
+  }
+  return formatter
+}
+
+/** "sábado, 7 de noviembre" (in the current language). */
+export function formatLongDate(date: Date, withYear = false): string {
+  return dateFormatter({
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    ...(withYear && { year: 'numeric' }),
+  }).format(date)
 }
 
 /** "7 nov" */
 export function formatShortDate(value: ISODate): string {
-  return format(parseISODate(value), 'd MMM', { locale: es })
+  return dateFormatter({ day: 'numeric', month: 'short' }).format(parseISODate(value))
+}
+
+/** "noviembre de 2026" */
+export function formatMonthYear(value: ISODate): string {
+  return dateFormatter({ month: 'long', year: 'numeric' }).format(parseISODate(value))
+}
+
+/** Name of a weekday: "lunes" (long), "lun" (short) or "L" (narrow). */
+export function formatWeekday(date: Date, width: 'long' | 'short' | 'narrow'): string {
+  return dateFormatter({ weekday: width }).format(date)
+}
+
+/** "lunes y jueves": a list joined the way the current language does it. */
+export function formatList(items: readonly string[]): string {
+  return new Intl.ListFormat(intlLocale(getLanguage()), {
+    style: 'long',
+    type: 'conjunction',
+  }).format(items)
 }
 
 /**
@@ -62,11 +100,9 @@ export function formatShortDate(value: ISODate): string {
  * year when it is not the current one ("miércoles, 20 de enero de 2027").
  */
 export function formatDayHeading(value: ISODate, today: ISODate): string {
-  if (value === today) return 'Hoy'
-  if (value === addDaysToISODate(today, 1)) return 'Mañana'
-  const date = parseISODate(value)
-  const label = formatLongDate(date)
-  return value.slice(0, 4) === today.slice(0, 4) ? label : `${label} de ${format(date, 'yyyy')}`
+  if (value === today) return t('day.today')
+  if (value === addDaysToISODate(today, 1)) return t('day.tomorrow')
+  return formatLongDate(parseISODate(value), value.slice(0, 4) !== today.slice(0, 4))
 }
 
 /** "09:05" for a Date, in 24h format. */

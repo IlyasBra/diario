@@ -2,9 +2,11 @@ import { useId } from 'react'
 
 import { Button } from '@/components/ui/Button'
 import { inputClassName } from '@/components/ui/styles'
+import { tagDisplayName } from '@/features/tags/names'
 import { useTags } from '@/features/tags/state/useTags'
-import { PRIORITY_LABELS } from '@/features/tasks/labels'
+import { priorityLabel } from '@/features/tasks/labels'
 import { PRIORITIES, type Priority } from '@/features/tasks/types'
+import { useI18n } from '@/i18n'
 
 import { EMPTY_FILTER, isFilterActive, type TaskFilter } from '../filters'
 
@@ -15,6 +17,7 @@ interface FilterBarProps {
 
 /** Two selects (tag, priority) and a button to clear them. */
 export function FilterBar({ filter, onChange }: FilterBarProps) {
+  const { t } = useI18n()
   const { tags } = useTags()
   const tagId = useId()
   const priorityId = useId()
@@ -26,7 +29,7 @@ export function FilterBar({ filter, onChange }: FilterBarProps) {
           htmlFor={tagId}
           className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400"
         >
-          Etiqueta
+          {t('filters.tag')}
         </label>
         <select
           id={tagId}
@@ -36,10 +39,10 @@ export function FilterBar({ filter, onChange }: FilterBarProps) {
           }}
           className={inputClassName}
         >
-          <option value="">Todas</option>
+          <option value="">{t('filters.all')}</option>
           {tags.map((tag) => (
             <option key={tag.id} value={tag.id}>
-              {tag.name}
+              {tagDisplayName(tag)}
             </option>
           ))}
         </select>
@@ -50,7 +53,7 @@ export function FilterBar({ filter, onChange }: FilterBarProps) {
           htmlFor={priorityId}
           className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400"
         >
-          Prioridad
+          {t('filters.priority')}
         </label>
         <select
           id={priorityId}
@@ -63,10 +66,10 @@ export function FilterBar({ filter, onChange }: FilterBarProps) {
           }}
           className={inputClassName}
         >
-          <option value="">Todas</option>
+          <option value="">{t('filters.all')}</option>
           {PRIORITIES.map((priority) => (
             <option key={priority} value={priority}>
-              {PRIORITY_LABELS[priority]}
+              {priorityLabel(priority)}
             </option>
           ))}
         </select>
@@ -78,7 +81,7 @@ export function FilterBar({ filter, onChange }: FilterBarProps) {
             onChange(EMPTY_FILTER)
           }}
         >
-          Quitar filtros
+          {t('filters.clear')}
         </Button>
       )}
     </div>

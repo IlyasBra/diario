@@ -1,3 +1,4 @@
+import { t } from '@/i18n'
 import { type EntityModel } from '@/lib/data/repository'
 import { isISODate, isTimeString } from '@/lib/dates'
 
@@ -94,14 +95,14 @@ export function validateTaskInput(input: TaskInput): TaskInputErrors {
   const errors: TaskInputErrors = {}
   const title = input.title.trim()
 
-  if (title.length === 0) errors.title = 'Escribe un título.'
+  if (title.length === 0) errors.title = t('error.titleRequired')
   else if (title.length > TITLE_MAX_LENGTH)
-    errors.title = `El título no puede superar ${TITLE_MAX_LENGTH} caracteres.`
+    errors.title = t('error.titleTooLong', { max: TITLE_MAX_LENGTH })
 
-  if (!isISODate(input.date)) errors.date = 'Elige una fecha.'
-  if (input.time !== null && !isTimeString(input.time)) errors.time = 'Escribe una hora válida.'
+  if (!isISODate(input.date)) errors.date = t('error.dateRequired')
+  if (input.time !== null && !isTimeString(input.time)) errors.time = t('error.timeInvalid')
   if (input.repeat.kind === 'weekly' && input.repeat.days.length === 0)
-    errors.repeat = 'Elige al menos un día de la semana.'
+    errors.repeat = t('error.weekdays')
 
   return errors
 }

@@ -1,3 +1,5 @@
+import { t } from '@/i18n'
+
 import { type TagColor } from './types'
 
 /**
@@ -39,13 +41,7 @@ export const TAG_COLOR_CLASSES: Record<TagColor, { badge: string; swatch: string
   },
 }
 
-export const TAG_COLOR_LABELS: Record<TagColor, string> = {
-  slate: 'Gris',
-  red: 'Rojo',
-  amber: 'Ámbar',
-  green: 'Verde',
-  teal: 'Turquesa',
-  blue: 'Azul',
-  violet: 'Violeta',
-  pink: 'Rosa',
+/** Colour name for screen readers, in the current language. */
+export function tagColorLabel(color: TagColor): string {
+  return t(`color.${color}`)
 }

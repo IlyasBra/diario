@@ -1,5 +1,6 @@
 import { type ReactNode } from 'react'
 
+import { useI18n } from '@/i18n'
 import { type ISODate } from '@/lib/dates'
 
 import { AppHeader } from './AppHeader'
@@ -14,13 +15,14 @@ interface AppShellProps {
 }
 
 export function AppShell({ today, nav, headerActions, children }: AppShellProps) {
+  const { t } = useI18n()
   return (
     <div className="flex min-h-dvh flex-col">
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-md focus:bg-white focus:px-3 focus:py-2 focus:shadow dark:focus:bg-slate-800"
+        className="sr-only focus:not-sr-only focus:fixed focus:start-2 focus:top-2 focus:z-50 focus:rounded-md focus:bg-white focus:px-3 focus:py-2 focus:shadow dark:focus:bg-slate-800"
       >
-        Saltar al contenido
+        {t('layout.skip')}
       </a>
       <AppHeader today={today} actions={headerActions} />
       {nav}

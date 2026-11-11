@@ -1,4 +1,5 @@
 import { useUndo } from '@/features/undo/useUndo'
+import { useI18n } from '@/i18n'
 import { useState } from 'react'
 
 import { ConfirmDelete } from '@/components/ui/ConfirmDelete'
@@ -20,7 +21,8 @@ interface ReminderEditorDialogProps {
 }
 
 export function ReminderEditorDialog({ state, onClose }: ReminderEditorDialogProps) {
-  const title = state?.mode === 'edit' ? 'Editar recordatorio' : 'Nuevo recordatorio'
+  const { t } = useI18n()
+  const title = state?.mode === 'edit' ? t('reminder.editTitle') : t('reminder.new')
 
   return (
     <Dialog open={state !== null} onClose={onClose} title={title}>
@@ -44,6 +46,7 @@ function ReminderEditorContent({
 }) {
   const { createReminder, updateReminder, deleteReminder, restoreReminder } = useReminders()
   const { showUndo } = useUndo()
+  const { t } = useI18n()
   const [confirmingDelete, setConfirmingDelete] = useState(false)
 
   if (state.mode === 'create') {
@@ -57,7 +60,7 @@ function ReminderEditorContent({
     return (
       <ReminderForm
         initialValues={initialValues}
-        submitLabel="Añadir"
+        submitLabel={t('common.add')}
         autoFocusTitle
         onCancel={onClose}
         onSubmit={async (input) => {
@@ -82,7 +85,7 @@ function ReminderEditorContent({
           void deleteReminder(reminder.id).then((deleted) => {
             if (!deleted) return
             onClose()
-            showUndo('Recordatorio borrado', () => {
+            showUndo(t('reminder.deleted'), () => {
               void restoreReminder(reminder)
             })
           })
@@ -94,7 +97,7 @@ function ReminderEditorContent({
   return (
     <ReminderForm
       initialValues={toReminderInput(reminder)}
-      submitLabel="Guardar"
+      submitLabel={t('common.save')}
       onCancel={onClose}
       onSubmit={async (input) => {
         const saved = await updateReminder(reminder.id, input)
@@ -103,7 +106,7 @@ function ReminderEditorContent({
       }}
       secondaryAction={
         <DeleteButton
-          label="Borrar recordatorio"
+          label={t('reminder.deleteLabel')}
           onClick={() => {
             setConfirmingDelete(true)
           }}

@@ -36,18 +36,10 @@ import { type Task } from '@/features/tasks/types'
 import { UndoProvider } from '@/features/undo/UndoProvider'
 import { useHashRoute } from '@/hooks/useHashRoute'
 import { usePersistentStorage } from '@/hooks/usePersistentStorage'
+import { useI18n } from '@/i18n'
 import { addDaysToISODate, type ISODate } from '@/lib/dates'
 
-import { DEFAULT_ROUTE, NAV_ITEMS, type Route, ROUTES } from './routes'
-
-const CREATE_LABELS: Record<Route, string> = {
-  hoy: 'Nueva tarea',
-  proximos: 'Nueva tarea',
-  calendario: 'Nueva tarea',
-  recordatorios: 'Nuevo recordatorio',
-  resumen: 'Nueva tarea',
-  buscar: 'Nueva tarea',
-}
+import { DEFAULT_ROUTE, navItems, ROUTES } from './routes'
 
 interface MainScreenProps {
   today: ISODate
@@ -55,6 +47,7 @@ interface MainScreenProps {
 }
 
 export function MainScreen({ today, isPersistent }: MainScreenProps) {
+  const { t } = useI18n()
   const route = useHashRoute(ROUTES, DEFAULT_ROUTE)
   const tasks = useTasks()
   const reminders = useReminders()
@@ -107,7 +100,7 @@ export function MainScreen({ today, isPersistent }: MainScreenProps) {
     <UndoProvider>
       <AppShell
         today={today}
-        nav={<MainNav items={NAV_ITEMS} currentId={route} />}
+        nav={<MainNav items={navItems(t)} currentId={route} />}
         headerActions={
           <>
             <a
@@ -116,7 +109,7 @@ export function MainScreen({ today, isPersistent }: MainScreenProps) {
               className="inline-flex size-11 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
             >
               <SearchIcon />
-              <span className="sr-only">Buscar</span>
+              <span className="sr-only">{t('header.search')}</span>
             </a>
             <Button
               variant="ghost"
@@ -124,37 +117,35 @@ export function MainScreen({ today, isPersistent }: MainScreenProps) {
               onClick={() => {
                 setSettingsOpen(true)
               }}
-              className="-mr-2"
+              className="-me-2"
             >
               <SettingsIcon />
-              <span className="sr-only">Ajustes</span>
+              <span className="sr-only">{t('header.settings')}</span>
             </Button>
           </>
         }
       >
         <div className="mb-6 space-y-3 empty:hidden">
-          {!isPersistent && (
-            <Notice tone="warning">
-              Este navegador no permite guardar datos: lo que apuntes se perderá al cerrar la app.
-            </Notice>
-          )}
+          {!isPersistent && <Notice tone="warning">{t('main.noStorage')}</Notice>}
           {tasks.error && (
             <Notice tone="error" onDismiss={tasks.dismissError}>
-              {tasks.error} Inténtalo de nuevo.
+              {tasks.error} {t('main.retry')}
             </Notice>
           )}
           {reminders.error && (
             <Notice tone="error" onDismiss={reminders.dismissError}>
-              {reminders.error} Inténtalo de nuevo.
+              {reminders.error} {t('main.retry')}
             </Notice>
           )}
         </div>
 
-        {status === 'loading' && <p className="text-slate-600 dark:text-slate-400">Cargando…</p>}
+        {status === 'loading' && (
+          <p className="text-slate-600 dark:text-slate-400">{t('common.loading')}</p>
+        )}
         {status === 'error' && (
           <EmptyState
-            title="No se han podido cargar tus datos"
-            description="Recarga la página. Si el problema sigue, revisa el espacio libre del dispositivo."
+            title={t('main.loadErrorTitle')}
+            description={t('main.loadErrorDescription')}
           />
         )}
         {status === 'ready' && (
@@ -162,7 +153,7 @@ export function MainScreen({ today, isPersistent }: MainScreenProps) {
             {(route === 'hoy' || route === 'proximos') && (
               <details className="mb-6 rounded-xl ring-1 ring-slate-200 dark:ring-slate-800">
                 <summary className="flex min-h-11 cursor-pointer items-center px-3 text-sm font-medium">
-                  Filtros{isFilterActive(filter) ? ' (activos)' : ''}
+                  {isFilterActive(filter) ? t('filters.summaryActive') : t('filters.summary')}
                 </summary>
                 <div className="px-3 pb-3">
                   <FilterBar filter={filter} onChange={setFilter} />
@@ -211,10 +202,10 @@ export function MainScreen({ today, isPersistent }: MainScreenProps) {
             <Button
               variant="primary"
               onClick={openCreate}
-              className="fixed right-4 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-20 h-14 rounded-full pr-5 pl-4 shadow-lg md:bottom-8"
+              className="fixed end-4 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-20 h-14 rounded-full ps-4 pe-5 shadow-lg md:bottom-8"
             >
               <PlusIcon />
-              {CREATE_LABELS[route]}
+              {route === 'recordatorios' ? t('main.newReminder') : t('main.newTask')}
             </Button>
           </>
         )}

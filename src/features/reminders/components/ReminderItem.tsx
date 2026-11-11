@@ -1,10 +1,11 @@
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { PencilIcon, RepeatIcon } from '@/components/ui/icons'
+import { useI18n } from '@/i18n'
 import { cn } from '@/lib/cn'
 import { formatShortDate, formatTime, toISODate } from '@/lib/dates'
 
-import { REPEAT_LABELS } from '../labels'
+import { repeatLabel } from '../labels'
 import { type ReminderOccurrence } from '../selectors'
 import { type Reminder } from '../types'
 
@@ -16,6 +17,7 @@ interface ReminderItemProps {
 }
 
 export function ReminderItem({ occurrence, isPast = false, onEdit }: ReminderItemProps) {
+  const { t } = useI18n()
   const { reminder, at } = occurrence
 
   return (
@@ -47,8 +49,8 @@ export function ReminderItem({ occurrence, isPast = false, onEdit }: ReminderIte
         {reminder.repeat !== 'none' && (
           <div className="mt-1.5">
             <Badge tone="info">
-              <RepeatIcon className="mr-1 size-3.5" />
-              {REPEAT_LABELS[reminder.repeat]}
+              <RepeatIcon className="me-1 size-3.5" />
+              {repeatLabel(reminder.repeat)}
             </Badge>
           </div>
         )}
@@ -60,11 +62,11 @@ export function ReminderItem({ occurrence, isPast = false, onEdit }: ReminderIte
         onClick={() => {
           onEdit(reminder)
         }}
-        title="Editar"
-        className="-my-1 -mr-1"
+        title={t('task.edit')}
+        className="-my-1 -me-1"
       >
         <PencilIcon />
-        <span className="sr-only">Editar «{reminder.title}»</span>
+        <span className="sr-only">{t('task.editSr', { title: reminder.title })}</span>
       </Button>
     </li>
   )

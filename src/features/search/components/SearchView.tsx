@@ -14,6 +14,7 @@ import { useTaskItemActions } from '@/features/tasks/state/useTaskItemActions'
 import { useTasks } from '@/features/tasks/state/useTasks'
 import { type Task } from '@/features/tasks/types'
 import { useNow } from '@/hooks/useNow'
+import { useI18n } from '@/i18n'
 import { type ISODate } from '@/lib/dates'
 
 import { EMPTY_FILTER, isFilterActive, searchAll, type TaskFilter } from '../filters'
@@ -26,6 +27,7 @@ interface SearchViewProps {
 }
 
 export function SearchView({ today, onEditTask, onEditReminder }: SearchViewProps) {
+  const { t } = useI18n()
   const { tasks } = useTasks()
   const { reminders } = useReminders()
   const { tags } = useTags()
@@ -47,11 +49,11 @@ export function SearchView({ today, onEditTask, onEditReminder }: SearchViewProp
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold tracking-tight">Buscar</h1>
+      <h1 className="text-2xl font-semibold tracking-tight">{t('search.title')}</h1>
 
       <div>
         <label htmlFor={searchId} className="sr-only">
-          Buscar en tareas y recordatorios
+          {t('search.label')}
         </label>
         <input
           id={searchId}
@@ -60,7 +62,7 @@ export function SearchView({ today, onEditTask, onEditReminder }: SearchViewProp
           onChange={(event) => {
             setQuery(event.target.value)
           }}
-          placeholder="Buscar en tareas y recordatorios"
+          placeholder={t('search.label')}
           autoComplete="off"
           enterKeyHint="search"
           className={inputClassName}
@@ -70,26 +72,24 @@ export function SearchView({ today, onEditTask, onEditReminder }: SearchViewProp
       <FilterBar filter={filter} onChange={setFilter} />
 
       {!isSearching ? (
-        <p className="text-sm text-slate-600 dark:text-slate-400">
-          Escribe una palabra o elige una etiqueta o prioridad. Busca en títulos, notas, subtareas y
-          etiquetas, sin importar mayúsculas ni tildes.
-        </p>
+        <p className="text-sm text-slate-600 dark:text-slate-400">{t('search.hint')}</p>
       ) : isEmpty ? (
-        <EmptyState
-          title="No hay resultados"
-          description="Prueba con otra palabra o quita algún filtro."
-        />
+        <EmptyState title={t('search.emptyTitle')} description={t('search.emptyDescription')} />
       ) : (
         <>
           {taskResults.length > 0 && (
-            <TaskSection title="Tareas" tasks={taskResults} today={today} {...actions} />
+            <TaskSection title={t('search.tasks')} tasks={taskResults} today={today} {...actions} />
           )}
           {upcoming.length > 0 && (
-            <ReminderSection title="Recordatorios" occurrences={upcoming} onEdit={onEditReminder} />
+            <ReminderSection
+              title={t('search.reminders')}
+              occurrences={upcoming}
+              onEdit={onEditReminder}
+            />
           )}
           {past.length > 0 && (
             <ReminderSection
-              title="Recordatorios pasados"
+              title={t('search.pastReminders')}
               occurrences={past}
               isPast
               onEdit={onEditReminder}

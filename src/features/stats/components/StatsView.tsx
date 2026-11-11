@@ -1,10 +1,8 @@
 import { EmptyState } from '@/components/ui/EmptyState'
 import { TagBadge } from '@/features/tags/components/TagBadge'
 import { useTasks } from '@/features/tasks/state/useTasks'
-import { formatShortDate, type ISODate, parseISODate } from '@/lib/dates'
-import { pluralize } from '@/lib/text'
-import { format } from 'date-fns'
-import { es } from 'date-fns/locale'
+import { useI18n } from '@/i18n'
+import { formatShortDate, formatWeekday, type ISODate, parseISODate } from '@/lib/dates'
 
 import {
   bestStreak,
@@ -21,17 +19,15 @@ interface StatsViewProps {
 }
 
 export function StatsView({ today }: StatsViewProps) {
+  const { t, tn } = useI18n()
   const { tasks } = useTasks()
   const counts = completionsByDay(tasks)
 
   if (counts.size === 0) {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl font-semibold tracking-tight">Resumen</h1>
-        <EmptyState
-          title="Todavía no hay datos"
-          description="Completa tareas y aquí verás tu racha, lo que has hecho cada semana y en qué etiquetas."
-        />
+        <h1 className="text-2xl font-semibold tracking-tight">{t('stats.title')}</h1>
+        <EmptyState title={t('stats.emptyTitle')} description={t('stats.emptyDescription')} />
       </div>
     )
   }
@@ -45,13 +41,13 @@ export function StatsView({ today }: StatsViewProps) {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold tracking-tight">Resumen</h1>
+      <h1 className="text-2xl font-semibold tracking-tight">{t('stats.title')}</h1>
 
       <dl className="grid grid-cols-2 gap-3">
-        <Stat label="Racha actual" value={pluralize(streak, 'día', 'días')} />
-        <Stat label="Mejor racha" value={pluralize(bestStreak(counts), 'día', 'días')} />
-        <Stat label="Esta semana" value={String(totalBetween(counts, monday, today))} />
-        <Stat label="Últimos 30 días" value={String(totalBetween(counts, monthAgo, today))} />
+        <Stat label={t('stats.streak')} value={tn('count.days', streak)} />
+        <Stat label={t('stats.bestStreak')} value={tn('count.days', bestStreak(counts))} />
+        <Stat label={t('stats.thisWeek')} value={String(totalBetween(counts, monday, today))} />
+        <Stat label={t('stats.last30')} value={String(totalBetween(counts, monthAgo, today))} />
       </dl>
 
       <section aria-labelledby="week-heading">
@@ -59,7 +55,7 @@ export function StatsView({ today }: StatsViewProps) {
           id="week-heading"
           className="mb-3 text-sm font-semibold text-slate-600 dark:text-slate-400"
         >
-          Tareas completadas, últimos 7 días
+          {t('stats.weekHeading')}
         </h2>
         <ul className="flex h-40 items-end gap-2 rounded-2xl bg-white p-4 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
           {week.map((day) => (
@@ -77,7 +73,7 @@ export function StatsView({ today }: StatsViewProps) {
               <span className="text-xs text-slate-600 dark:text-slate-400">
                 <span className="sr-only">{formatShortDate(day.date)}: </span>
                 <span aria-hidden="true" className="first-letter:uppercase">
-                  {format(parseISODate(day.date), 'EEEEE', { locale: es })}
+                  {formatWeekday(parseISODate(day.date), 'narrow')}
                 </span>
               </span>
             </li>
@@ -91,7 +87,7 @@ export function StatsView({ today }: StatsViewProps) {
             id="tags-stats-heading"
             className="mb-2 text-sm font-semibold text-slate-600 dark:text-slate-400"
           >
-            Por etiqueta, últimos 30 días
+            {t('stats.byTag')}
           </h2>
           <ul className="space-y-2">
             {byTag.map(({ tagId, count }) => (

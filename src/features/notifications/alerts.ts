@@ -2,6 +2,7 @@ import { getOccurrencesBetween } from '@/features/reminders/occurrences'
 import { type Reminder } from '@/features/reminders/types'
 import { selectTasksOnDay } from '@/features/tasks/selectors'
 import { type Task } from '@/features/tasks/types'
+import { t } from '@/i18n'
 import { addDaysToISODate, combineDateAndTime, formatTime, toISODate } from '@/lib/dates'
 
 export interface Alert {
@@ -30,7 +31,9 @@ export function collectDueAlerts(
       alerts.push({
         key: `reminder:${reminder.id}:${at.toISOString()}`,
         title: reminder.title,
-        body: [`Recordatorio · ${formatTime(at)}`, reminder.note].filter(Boolean).join('\n'),
+        body: [t('alerts.reminderBody', { time: formatTime(at) }), reminder.note]
+          .filter(Boolean)
+          .join('\n'),
         at,
       })
     }
@@ -46,7 +49,7 @@ export function collectDueAlerts(
       alerts.push({
         key: `task:${task.id}:${day}T${task.time}`,
         title: task.title,
-        body: [`Tarea · ${task.time}`, task.note].filter(Boolean).join('\n'),
+        body: [t('alerts.taskBody', { time: task.time }), task.note].filter(Boolean).join('\n'),
         at,
       })
     }

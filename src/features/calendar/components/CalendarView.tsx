@@ -3,13 +3,14 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/Button'
 import { ChevronLeftIcon, ChevronRightIcon, PlusIcon } from '@/components/ui/icons'
 import { cn } from '@/lib/cn'
+import { useI18n } from '@/i18n'
 import { formatDayHeading, type ISODate, parseISODate } from '@/lib/dates'
-import { pluralize } from '@/lib/text'
 import { ReminderSection } from '@/features/reminders/components/ReminderSection'
 import { selectOccurrencesBetween } from '@/features/reminders/selectors'
 import { useReminders } from '@/features/reminders/state/useReminders'
 import { type Reminder } from '@/features/reminders/types'
 import { TaskSection } from '@/features/tasks/components/TaskSection'
+import { weekdayName, WEEKDAYS } from '@/features/tasks/recurrence'
 import { compareTasks, selectTasksByDay } from '@/features/tasks/selectors'
 import { useTaskItemActions } from '@/features/tasks/state/useTaskItemActions'
 import { useTasks } from '@/features/tasks/state/useTasks'
@@ -17,8 +18,6 @@ import { type Task } from '@/features/tasks/types'
 import { combineDateAndTime, toISODate } from '@/lib/dates'
 
 import { buildMonthGrid, firstOfMonth, formatMonthTitle, shiftMonth } from '../monthGrid'
-
-const WEEKDAY_HEADERS = ['L', 'M', 'X', 'J', 'V', 'S', 'D']
 
 interface CalendarViewProps {
   today: ISODate
@@ -38,6 +37,7 @@ export function CalendarView({
   onEditTask,
   onEditReminder,
 }: CalendarViewProps) {
+  const { t, tn } = useI18n()
   const { tasks } = useTasks()
   const { reminders } = useReminders()
   const actions = useTaskItemActions(today, onEditTask)
@@ -68,7 +68,7 @@ export function CalendarView({
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold tracking-tight">Calendario</h1>
+      <h1 className="text-2xl font-semibold tracking-tight">{t('calendar.title')}</h1>
 
       <div className="flex items-center justify-between">
         <Button
@@ -79,7 +79,7 @@ export function CalendarView({
           }}
         >
           <ChevronLeftIcon />
-          <span className="sr-only">Mes anterior</span>
+          <span className="sr-only">{t('calendar.previous')}</span>
         </Button>
         <h2 aria-live="polite" className="text-lg font-semibold first-letter:uppercase">
           {formatMonthTitle(month)}
@@ -92,15 +92,15 @@ export function CalendarView({
           }}
         >
           <ChevronRightIcon />
-          <span className="sr-only">Mes siguiente</span>
+          <span className="sr-only">{t('calendar.next')}</span>
         </Button>
       </div>
 
       <div role="grid" aria-label={formatMonthTitle(month)} className="space-y-1">
         <div role="row" className="grid grid-cols-7 text-center text-xs font-medium text-slate-500">
-          {WEEKDAY_HEADERS.map((header, index) => (
-            <span key={header + String(index)} role="columnheader" aria-hidden="true">
-              {header}
+          {WEEKDAYS.map((day) => (
+            <span key={day} role="columnheader" aria-hidden="true">
+              {weekdayName(day, 'narrow')}
             </span>
           ))}
         </div>
@@ -112,10 +112,8 @@ export function CalendarView({
               const inMonth = day.slice(0, 7) === month.slice(0, 7)
               const label = [
                 formatDayHeading(day, today),
-                taskCount > 0 ? pluralize(taskCount, 'tarea', 'tareas') : null,
-                reminderCount > 0
-                  ? pluralize(reminderCount, 'recordatorio', 'recordatorios')
-                  : null,
+                taskCount > 0 ? tn('count.tasks', taskCount) : null,
+                reminderCount > 0 ? tn('count.reminders', reminderCount) : null,
               ]
                 .filter(Boolean)
                 .join(', ')
@@ -170,10 +168,12 @@ export function CalendarView({
 
       <p className="flex gap-4 text-xs text-slate-600 dark:text-slate-400">
         <span className="flex items-center gap-1.5">
-          <span aria-hidden="true" className="size-2 rounded-full bg-brand-500" /> Tareas
+          <span aria-hidden="true" className="size-2 rounded-full bg-brand-500" />{' '}
+          {t('search.tasks')}
         </span>
         <span className="flex items-center gap-1.5">
-          <span aria-hidden="true" className="size-2 rounded-full bg-amber-500" /> Recordatorios
+          <span aria-hidden="true" className="size-2 rounded-full bg-amber-500" />{' '}
+          {t('search.reminders')}
         </span>
       </p>
 
@@ -189,19 +189,19 @@ export function CalendarView({
             }}
           >
             <PlusIcon className="size-4" />
-            Añadir tarea
+            {t('task.add')}
           </Button>
         </div>
 
         {dayTasks.length === 0 && dayReminders.length === 0 && (
-          <p className="text-sm text-slate-600 dark:text-slate-400">Nada planeado este día.</p>
+          <p className="text-sm text-slate-600 dark:text-slate-400">{t('calendar.empty')}</p>
         )}
         {dayTasks.length > 0 && (
-          <TaskSection title="Tareas" tasks={dayTasks} today={today} {...actions} />
+          <TaskSection title={t('search.tasks')} tasks={dayTasks} today={today} {...actions} />
         )}
         {dayReminders.length > 0 && (
           <ReminderSection
-            title="Recordatorios"
+            title={t('search.reminders')}
             occurrences={dayReminders}
             onEdit={onEditReminder}
           />

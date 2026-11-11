@@ -9,13 +9,18 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core'
-import { format } from 'date-fns'
-import { es } from 'date-fns/locale'
 import { type ReactNode } from 'react'
 
-import { cn } from '@/lib/cn'
-import { addDaysToISODate, formatDayHeading, type ISODate, parseISODate } from '@/lib/dates'
 import { useUndo } from '@/features/undo/useUndo'
+import { useI18n } from '@/i18n'
+import { cn } from '@/lib/cn'
+import {
+  addDaysToISODate,
+  formatDayHeading,
+  formatWeekday,
+  type ISODate,
+  parseISODate,
+} from '@/lib/dates'
 
 import { resolveTaskMove } from '../dragging'
 import { useTasks } from '../state/useTasks'
@@ -32,6 +37,7 @@ interface TaskDragProviderProps {
  * with the next seven days appears at the bottom of the screen as drop targets.
  */
 export function TaskDragProvider({ today, children }: TaskDragProviderProps) {
+  const { t } = useI18n()
   const { tasks, updateTask } = useTasks()
   const { showUndo } = useUndo()
   // The handle has touch-action: none, so touch drags start immediately and
@@ -47,25 +53,25 @@ export function TaskDragProvider({ today, children }: TaskDragProviderProps) {
     if (!move) return
 
     void updateTask(move.taskId, { date: move.to })
-    showUndo(`Movida a ${formatDayHeading(move.to, today).toLowerCase()}`, () => {
+    showUndo(t('task.movedTo', { day: formatDayHeading(move.to, today).toLowerCase() }), () => {
       void updateTask(move.taskId, { date: move.from })
     })
   }
 
   // Screen reader messages (the library's defaults are in English).
   const titleOf = (id: string | number) =>
-    tasks.find((task) => task.id === String(id))?.title ?? 'la tarea'
+    tasks.find((task) => task.id === String(id))?.title ?? t('drag.theTask')
   const dayOf = (id: string | number | undefined) =>
-    id === undefined ? 'ningún día' : formatDayHeading(String(id), today).toLowerCase()
+    id === undefined ? t('drag.noDay') : formatDayHeading(String(id), today).toLowerCase()
   const announcements: Announcements = {
-    onDragStart: ({ active }) => `Has cogido «${titleOf(active.id)}».`,
+    onDragStart: ({ active }) => t('drag.start', { title: titleOf(active.id) }),
     onDragOver: ({ active, over }) =>
-      over ? `«${titleOf(active.id)}» está sobre ${dayOf(over.id)}.` : undefined,
+      over ? t('drag.over', { title: titleOf(active.id), day: dayOf(over.id) }) : undefined,
     onDragEnd: ({ active, over }) =>
       over
-        ? `Has soltado «${titleOf(active.id)}» sobre ${dayOf(over.id)}.`
-        : `Has soltado «${titleOf(active.id)}» fuera de los días.`,
-    onDragCancel: ({ active }) => `Has cancelado el movimiento de «${titleOf(active.id)}».`,
+        ? t('drag.dropped', { title: titleOf(active.id), day: dayOf(over.id) })
+        : t('drag.outside', { title: titleOf(active.id) }),
+    onDragCancel: ({ active }) => t('drag.cancel', { title: titleOf(active.id) }),
   }
 
   return (
@@ -75,8 +81,7 @@ export function TaskDragProvider({ today, children }: TaskDragProviderProps) {
       accessibility={{
         announcements,
         screenReaderInstructions: {
-          draggable:
-            'Arrastra con el dedo o el ratón para llevar la tarea a otro día. Con teclado, cambia la fecha desde el botón de editar.',
+          draggable: t('drag.instructions'),
         },
       }}
     >
@@ -87,6 +92,7 @@ export function TaskDragProvider({ today, children }: TaskDragProviderProps) {
 }
 
 function DayTargets({ today }: { today: ISODate }) {
+  const { t } = useI18n()
   const { active } = useDndContext()
   if (!active) return null
 
@@ -98,7 +104,7 @@ function DayTargets({ today }: { today: ISODate }) {
       className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-30 border-t border-slate-200 bg-white/95 p-3 shadow-lg backdrop-blur md:bottom-0 dark:border-slate-700 dark:bg-slate-900/95"
     >
       <p className="mb-2 text-center text-xs font-medium text-slate-600 dark:text-slate-400">
-        Suéltala sobre un día
+        {t('drag.drop')}
       </p>
       <ul className="mx-auto flex max-w-2xl gap-2 overflow-x-auto">
         {days.map((day) => (
@@ -110,9 +116,11 @@ function DayTargets({ today }: { today: ISODate }) {
 }
 
 function DayTarget({ day, today }: { day: ISODate; today: ISODate }) {
+  const { t } = useI18n()
   const { setNodeRef, isOver } = useDroppable({ id: day })
   const date = parseISODate(day)
-  const label = day === today ? 'Hoy' : day === addDaysToISODate(today, 1) ? 'Mañana' : null
+  const label =
+    day === today ? t('day.today') : day === addDaysToISODate(today, 1) ? t('day.tomorrow') : null
 
   return (
     <li
@@ -124,7 +132,7 @@ function DayTarget({ day, today }: { day: ISODate; today: ISODate }) {
           : 'bg-slate-100 text-slate-700 ring-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-700',
       )}
     >
-      <span className="first-letter:uppercase">{label ?? format(date, 'EEE', { locale: es })}</span>
+      <span className="first-letter:uppercase">{label ?? formatWeekday(date, 'short')}</span>
       <span className="text-lg tabular-nums">{date.getDate()}</span>
     </li>
   )

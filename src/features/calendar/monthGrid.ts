@@ -1,7 +1,12 @@
-import { addMonths, endOfMonth, endOfWeek, format, startOfMonth, startOfWeek } from 'date-fns'
-import { es } from 'date-fns/locale'
+import { addMonths, endOfMonth, endOfWeek, startOfMonth, startOfWeek } from 'date-fns'
 
-import { addDaysToISODate, type ISODate, parseISODate, toISODate } from '@/lib/dates'
+import {
+  addDaysToISODate,
+  formatMonthYear,
+  type ISODate,
+  parseISODate,
+  toISODate,
+} from '@/lib/dates'
 
 /** First day of the month containing `date`. */
 export function firstOfMonth(date: ISODate): ISODate {
@@ -15,7 +20,7 @@ export function shiftMonth(date: ISODate, amount: number): ISODate {
 
 /** "noviembre de 2026" */
 export function formatMonthTitle(date: ISODate): string {
-  return format(parseISODate(date), "LLLL 'de' yyyy", { locale: es })
+  return formatMonthYear(date)
 }
 
 /**

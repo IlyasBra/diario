@@ -6,18 +6,21 @@ import { TagsProvider } from '@/features/tags/state/TagsProvider'
 import { RemindersProvider } from '@/features/reminders/state/RemindersProvider'
 import { TasksProvider } from '@/features/tasks/state/TasksProvider'
 import { useToday } from '@/hooks/useToday'
+import { useDocumentLanguage, useI18n } from '@/i18n'
 import { type ISODate } from '@/lib/dates'
 
 import { MainScreen } from './MainScreen'
 
 export function App() {
+  const { t } = useI18n()
+  useDocumentLanguage()
   const today = useToday()
 
   return (
     <Suspense
       fallback={
         <AppShell today={today}>
-          <p className="text-slate-600 dark:text-slate-400">Cargando…</p>
+          <p className="text-slate-600 dark:text-slate-400">{t('common.loading')}</p>
         </AppShell>
       }
     >

@@ -22,6 +22,9 @@ function Icon({ children, className = 'size-5', ...props }: IconProps) {
   )
 }
 
+/** Arrows and chevrons point along the reading direction, so they flip in right-to-left languages. */
+const FLIP_IN_RTL = 'rtl:-scale-x-100'
+
 export function PlusIcon(props: IconProps) {
   return (
     <Icon {...props}>
@@ -38,9 +41,9 @@ export function PencilIcon(props: IconProps) {
   )
 }
 
-export function ArrowRightIcon(props: IconProps) {
+export function ArrowRightIcon({ className = 'size-5', ...props }: IconProps) {
   return (
-    <Icon {...props}>
+    <Icon className={`${className} ${FLIP_IN_RTL}`} {...props}>
       <path d="M5 12h14M13 6l6 6-6 6" />
     </Icon>
   )
@@ -150,17 +153,17 @@ export function ChartIcon(props: IconProps) {
   )
 }
 
-export function ChevronLeftIcon(props: IconProps) {
+export function ChevronLeftIcon({ className = 'size-5', ...props }: IconProps) {
   return (
-    <Icon {...props}>
+    <Icon className={`${className} ${FLIP_IN_RTL}`} {...props}>
       <path d="m15 18-6-6 6-6" />
     </Icon>
   )
 }
 
-export function ChevronRightIcon(props: IconProps) {
+export function ChevronRightIcon({ className = 'size-5', ...props }: IconProps) {
   return (
-    <Icon {...props}>
+    <Icon className={`${className} ${FLIP_IN_RTL}`} {...props}>
       <path d="m9 18 6-6-6-6" />
     </Icon>
   )

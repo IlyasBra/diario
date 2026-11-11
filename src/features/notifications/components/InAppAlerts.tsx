@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/Button'
 import { BellIcon } from '@/components/ui/icons'
+import { useI18n } from '@/i18n'
 
 import { type Alert } from '../alerts'
 
@@ -10,6 +11,7 @@ interface InAppAlertsProps {
 
 /** Alerts shown inside the app when system notifications are not allowed. */
 export function InAppAlerts({ alerts, onDismiss }: InAppAlertsProps) {
+  const { t } = useI18n()
   if (alerts.length === 0) return null
 
   return (
@@ -33,7 +35,7 @@ export function InAppAlerts({ alerts, onDismiss }: InAppAlertsProps) {
               onDismiss(alert.key)
             }}
           >
-            Entendido
+            {t('alerts.dismiss')}
           </Button>
         </div>
       ))}

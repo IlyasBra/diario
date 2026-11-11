@@ -5,6 +5,7 @@ import { DeleteButton } from '@/components/ui/DeleteButton'
 import { Dialog } from '@/components/ui/Dialog'
 import { useTags } from '@/features/tags/state/useTags'
 import { useUndo } from '@/features/undo/useUndo'
+import { useI18n } from '@/i18n'
 import { type ISODate } from '@/lib/dates'
 
 import { toTaskInput } from '../model'
@@ -22,7 +23,8 @@ interface TaskEditorDialogProps {
 }
 
 export function TaskEditorDialog({ state, today, onClose }: TaskEditorDialogProps) {
-  const title = state?.mode === 'edit' ? 'Editar tarea' : 'Nueva tarea'
+  const { t } = useI18n()
+  const title = state?.mode === 'edit' ? t('task.editTitle') : t('task.new')
 
   return (
     <Dialog open={state !== null} onClose={onClose} title={title}>
@@ -47,6 +49,7 @@ interface TaskEditorContentProps {
 
 function TaskEditorContent({ state, today, onClose }: TaskEditorContentProps) {
   const { createTask, updateTask, deleteTask, restoreTask } = useTasks()
+  const { t } = useI18n()
   const { showUndo } = useUndo()
   const { tags } = useTags()
   const [confirmingDelete, setConfirmingDelete] = useState(false)
@@ -66,7 +69,7 @@ function TaskEditorContent({ state, today, onClose }: TaskEditorContentProps) {
       <TaskForm
         initialValues={initialValues}
         today={today}
-        submitLabel="Añadir"
+        submitLabel={t('common.add')}
         autoFocusTitle
         onCancel={onClose}
         onSubmit={async (input) => {
@@ -91,7 +94,7 @@ function TaskEditorContent({ state, today, onClose }: TaskEditorContentProps) {
           void deleteTask(task.id).then((deleted) => {
             if (!deleted) return
             onClose()
-            showUndo('Tarea borrada', () => {
+            showUndo(t('task.deleted'), () => {
               void restoreTask(task)
             })
           })
@@ -104,7 +107,7 @@ function TaskEditorContent({ state, today, onClose }: TaskEditorContentProps) {
     <TaskForm
       initialValues={toTaskInput(task)}
       today={today}
-      submitLabel="Guardar"
+      submitLabel={t('common.save')}
       onCancel={onClose}
       onSubmit={async (input) => {
         const saved = await updateTask(task.id, input)
@@ -113,7 +116,7 @@ function TaskEditorContent({ state, today, onClose }: TaskEditorContentProps) {
       }}
       secondaryAction={
         <DeleteButton
-          label="Borrar tarea"
+          label={t('task.deleteLabel')}
           onClick={() => {
             setConfirmingDelete(true)
           }}

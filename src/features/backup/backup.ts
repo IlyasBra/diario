@@ -9,6 +9,7 @@ import {
   type WeekdayIndex,
 } from '@/features/tasks/types'
 import { REPEATS, type Reminder } from '@/features/reminders/types'
+import { t } from '@/i18n'
 import { isISODate, isTimeString } from '@/lib/dates'
 
 export const BACKUP_APP = 'diario'
@@ -60,31 +61,29 @@ export function parseBackup(text: string): ParseBackupResult {
   try {
     data = JSON.parse(text)
   } catch {
-    return fail('El archivo no es un JSON válido.')
+    return fail(t('backup.invalidJson'))
   }
 
   if (!isRecord(data) || data.app !== BACKUP_APP) {
-    return fail('Este archivo no es una copia de seguridad de Diario.')
+    return fail(t('backup.notBackup'))
   }
   if (typeof data.version !== 'number' || data.version > BACKUP_VERSION) {
-    return fail(
-      'La copia es de una versión más nueva de la app. Actualiza Diario e inténtalo de nuevo.',
-    )
+    return fail(t('backup.newerVersion'))
   }
-  if (typeof data.exportedAt !== 'string') return fail('Faltan datos en la copia.')
+  if (typeof data.exportedAt !== 'string') return fail(t('backup.missingData'))
   if (!Array.isArray(data.tasks) || !Array.isArray(data.reminders)) {
-    return fail('Faltan datos en la copia.')
+    return fail(t('backup.missingData'))
   }
 
   const tasks: Task[] = []
   for (const item of data.tasks as unknown[]) {
     const task = readTask(item)
-    if (!task) return fail('La copia contiene tareas con datos no válidos.')
+    if (!task) return fail(t('backup.invalidTasks'))
     tasks.push(task)
   }
   const reminders: Reminder[] = []
   for (const item of data.reminders as unknown[]) {
-    if (!isReminder(item)) return fail('La copia contiene recordatorios con datos no válidos.')
+    if (!isReminder(item)) return fail(t('backup.invalidReminders'))
     reminders.push(item)
   }
 
@@ -94,19 +93,19 @@ export function parseBackup(text: string): ParseBackupResult {
     tags.push(...buildDefaultTags(new Date(data.exportedAt)))
   } else if (Array.isArray(data.tags)) {
     for (const item of data.tags as unknown[]) {
-      if (!isTag(item)) return fail('La copia contiene etiquetas con datos no válidos.')
+      if (!isTag(item)) return fail(t('backup.invalidTags'))
       tags.push(item)
     }
   } else {
-    return fail('Faltan datos en la copia.')
+    return fail(t('backup.missingData'))
   }
 
   if (hasDuplicateIds(tasks) || hasDuplicateIds(reminders) || hasDuplicateIds(tags)) {
-    return fail('La copia contiene elementos repetidos.')
+    return fail(t('backup.duplicates'))
   }
   const tagIds = new Set(tags.map((tag) => tag.id))
   if (tasks.some((task) => !tagIds.has(task.tag))) {
-    return fail('La copia contiene tareas con etiquetas desconocidas.')
+    return fail(t('backup.unknownTags'))
   }
 
   return {

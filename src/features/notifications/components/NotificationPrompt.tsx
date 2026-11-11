@@ -2,6 +2,7 @@ import { useState } from 'react'
 
 import { Button } from '@/components/ui/Button'
 import { BellIcon } from '@/components/ui/icons'
+import { useI18n } from '@/i18n'
 import { readLocal, writeLocal } from '@/lib/localStore'
 
 import { showSystemNotification } from '../notifier'
@@ -15,6 +16,7 @@ const DISMISSED_KEY = 'diario:notification-prompt-dismissed'
  * and iOS requires a user gesture).
  */
 export function NotificationPrompt() {
+  const { t } = useI18n()
   const { support, requestPermission } = useNotificationSupport()
   const [dismissed, setDismissed] = useState(() => readLocal(DISMISSED_KEY, false))
   const [testResult, setTestResult] = useState<string | null>(null)
@@ -25,14 +27,13 @@ export function NotificationPrompt() {
         <div className="flex gap-3">
           <BellIcon className="mt-0.5 size-6 shrink-0 text-brand-600 dark:text-brand-400" />
           <div>
-            <p className="font-medium">¿Te aviso a la hora?</p>
+            <p className="font-medium">{t('prompt.title')}</p>
             <p className="mt-1 text-sm text-slate-700 dark:text-slate-300">
-              Te enviaré una notificación cuando llegue la hora de un recordatorio o de una tarea
-              con hora.
+              {t('prompt.description')}
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
               <Button variant="primary" size="sm" onClick={() => void requestPermission()}>
-                Activar avisos
+                {t('prompt.enable')}
               </Button>
               <Button
                 variant="ghost"
@@ -42,7 +43,7 @@ export function NotificationPrompt() {
                   setDismissed(true)
                 }}
               >
-                Ahora no
+                {t('prompt.notNow')}
               </Button>
             </div>
           </div>
@@ -51,7 +52,14 @@ export function NotificationPrompt() {
     )
   }
 
-  const message = MESSAGES[support]
+  const messages: Record<typeof support, string | null> = {
+    default: null,
+    granted: t('prompt.granted'),
+    denied: t('prompt.denied'),
+    'install-required': t('prompt.installRequired'),
+    unsupported: t('prompt.unsupported'),
+  }
+  const message = messages[support]
   if (!message || (support === 'default' && dismissed)) return null
 
   return (
@@ -65,29 +73,18 @@ export function NotificationPrompt() {
               void showSystemNotification({
                 key: `test:${Date.now()}`,
                 title: 'Diario',
-                body: 'Así te llegarán los avisos.',
+                body: t('prompt.testBody'),
                 at: new Date(),
               }).then((shown) => {
-                setTestResult(shown ? null : 'El sistema no ha mostrado el aviso de prueba.')
+                setTestResult(shown ? null : t('prompt.testFailed'))
               })
             }}
           >
-            Enviar aviso de prueba
+            {t('prompt.test')}
           </Button>
           {testResult && <span role="status">{testResult}</span>}
         </div>
       )}
     </div>
   )
-}
-
-const MESSAGES: Record<ReturnType<typeof useNotificationSupport>['support'], string | null> = {
-  default: null,
-  granted:
-    'Avisos activados. Sin servidor, llegan mientras Diario está abierta o en segundo plano; si estaba cerrada, verás los avisos pendientes al abrirla.',
-  denied:
-    'Has bloqueado los avisos. Puedes activarlos en los ajustes del navegador o, en el iPhone, en Ajustes › Notificaciones › Diario. Mientras tanto te avisaré dentro de la app.',
-  'install-required':
-    'Para recibir avisos en el iPhone, añade Diario a la pantalla de inicio (Compartir › Añadir a pantalla de inicio) y ábrela desde su icono. Mientras tanto te avisaré dentro de la app.',
-  unsupported: 'Este navegador no permite notificaciones; te avisaré dentro de la app.',
 }

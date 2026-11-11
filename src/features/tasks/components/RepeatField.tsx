@@ -1,18 +1,12 @@
 import { useId } from 'react'
 
 import { SegmentedControl, type SegmentedOption } from '@/components/ui/SegmentedControl'
+import { useI18n } from '@/i18n'
 import { cn } from '@/lib/cn'
 import { type ISODate } from '@/lib/dates'
 
-import { weekdayIndex, WEEKDAY_INITIALS, WEEKDAY_LABELS, WEEKDAYS } from '../recurrence'
+import { weekdayIndex, weekdayName, WEEKDAYS } from '../recurrence'
 import { type TaskRepeat, type WeekdayIndex } from '../types'
-
-const OPTIONS: SegmentedOption<TaskRepeat['kind']>[] = [
-  { value: 'none', label: 'No' },
-  { value: 'daily', label: 'Cada día' },
-  { value: 'weekly', label: 'Cada semana' },
-  { value: 'monthly', label: 'Cada mes' },
-]
 
 interface RepeatFieldProps {
   value: TaskRepeat
@@ -23,6 +17,13 @@ interface RepeatFieldProps {
 }
 
 export function RepeatField({ value, startDate, error, onChange }: RepeatFieldProps) {
+  const { t } = useI18n()
+  const options: SegmentedOption<TaskRepeat['kind']>[] = [
+    { value: 'none', label: t('repeat.no') },
+    { value: 'daily', label: t('repeat.daily') },
+    { value: 'weekly', label: t('repeat.weekly') },
+    { value: 'monthly', label: t('repeat.monthly') },
+  ]
   const errorId = useId()
 
   function changeKind(kind: TaskRepeat['kind']) {
@@ -45,15 +46,15 @@ export function RepeatField({ value, startDate, error, onChange }: RepeatFieldPr
   return (
     <div className="space-y-3">
       <SegmentedControl
-        legend="Se repite"
-        options={OPTIONS}
+        legend={t('repeat.legend')}
+        options={options}
         value={value.kind}
         onChange={changeKind}
       />
 
       {value.kind === 'weekly' && (
         <fieldset aria-describedby={error ? errorId : undefined}>
-          <legend className="mb-1.5 block text-sm font-medium">Días de la semana</legend>
+          <legend className="mb-1.5 block text-sm font-medium">{t('repeat.weekdays')}</legend>
           <div className="flex gap-1.5">
             {WEEKDAYS.map((day) => (
               <label key={day} className="relative flex-1">
@@ -65,14 +66,14 @@ export function RepeatField({ value, startDate, error, onChange }: RepeatFieldPr
                   }}
                   className="peer sr-only"
                 />
-                <span className="sr-only">{WEEKDAY_LABELS[day]}</span>
+                <span className="sr-only">{weekdayName(day)}</span>
                 <span
                   aria-hidden="true"
                   className={cn(
                     'flex h-11 cursor-pointer items-center justify-center rounded-full bg-slate-100 text-sm font-semibold text-slate-700 peer-checked:bg-brand-600 peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-brand-500 dark:bg-slate-800 dark:text-slate-300',
                   )}
                 >
-                  {WEEKDAY_INITIALS[day]}
+                  {weekdayName(day, 'narrow')}
                 </span>
               </label>
             ))}

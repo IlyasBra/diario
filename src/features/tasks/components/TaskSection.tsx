@@ -41,7 +41,7 @@ export function TaskSection({
         )}
       >
         {title}
-        <span className="ml-1.5 font-normal">({tasks.length})</span>
+        <span className="ms-1.5 font-normal">({tasks.length})</span>
       </h2>
       <ul className="space-y-2">
         {tasks.map((task) =>

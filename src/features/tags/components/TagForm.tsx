@@ -3,9 +3,10 @@ import { type SubmitEvent, useId, useState } from 'react'
 import { Button } from '@/components/ui/Button'
 import { Field } from '@/components/ui/Field'
 import { inputClassName } from '@/components/ui/styles'
+import { useI18n } from '@/i18n'
 import { cn } from '@/lib/cn'
 
-import { TAG_COLOR_CLASSES, TAG_COLOR_LABELS } from '../colors'
+import { TAG_COLOR_CLASSES, tagColorLabel } from '../colors'
 import { TAG_NAME_MAX_LENGTH, validateTagInput } from '../model'
 import { type Tag, type TagColor, type TagInput, TAG_COLORS } from '../types'
 
@@ -26,6 +27,7 @@ export function TagForm({
   onSubmit,
   onCancel,
 }: TagFormProps) {
+  const { t } = useI18n()
   const [name, setName] = useState(initialValues.name)
   const [color, setColor] = useState<TagColor>(initialValues.color)
   const [showErrors, setShowErrors] = useState(false)
@@ -51,7 +53,7 @@ export function TagForm({
 
   return (
     <form noValidate onSubmit={(event) => void handleSubmit(event)} className="space-y-3">
-      <Field label="Nombre" htmlFor={nameId} errorId={errorId} error={errors.name}>
+      <Field label={t('form.name')} htmlFor={nameId} errorId={errorId} error={errors.name}>
         <input
           id={nameId}
           type="text"
@@ -69,7 +71,7 @@ export function TagForm({
       </Field>
 
       <fieldset>
-        <legend className="mb-1.5 block text-sm font-medium">Color</legend>
+        <legend className="mb-1.5 block text-sm font-medium">{t('form.color')}</legend>
         <div className="flex flex-wrap gap-2">
           {TAG_COLORS.map((option) => (
             <label key={option} className="relative">
@@ -83,7 +85,7 @@ export function TagForm({
                 }}
                 className="peer sr-only"
               />
-              <span className="sr-only">{TAG_COLOR_LABELS[option]}</span>
+              <span className="sr-only">{tagColorLabel(option)}</span>
               <span
                 aria-hidden="true"
                 className="flex size-11 cursor-pointer items-center justify-center rounded-full ring-2 ring-transparent peer-checked:ring-slate-900 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-brand-500 dark:peer-checked:ring-white"
@@ -99,7 +101,7 @@ export function TagForm({
         <Button type="submit" variant="primary">
           {submitLabel}
         </Button>
-        {onCancel && <Button onClick={onCancel}>Cancelar</Button>}
+        {onCancel && <Button onClick={onCancel}>{t('common.cancel')}</Button>}
       </div>
     </form>
   )
