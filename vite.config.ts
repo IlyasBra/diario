@@ -45,6 +45,9 @@ export default defineConfig({
         // Single page app: any navigation falls back to the cached shell, so it opens offline.
         navigateFallback: 'index.html',
         cleanupOutdatedCaches: true,
+        // A new version takes over as soon as it is downloaded, even with the app open.
+        skipWaiting: true,
+        clientsClaim: true,
       },
     }),
   ],
