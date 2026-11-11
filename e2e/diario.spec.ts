@@ -40,6 +40,7 @@ test.describe('dragging', () => {
   test.use({ hasTouch: false, isMobile: false, viewport: { width: 390, height: 844 } })
 
   test('a task can be dragged to another day and moved back with undo', async ({ page }) => {
+    page.on('console', (m) => process.stdout.write(`PAGE ${m.text()}\n`))
     await openApp(page)
     await addTask(page, 'Regar las plantas')
 
