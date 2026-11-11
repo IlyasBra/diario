@@ -35,7 +35,7 @@ App web de organización personal: tareas, recordatorios, calendario y estadíst
 | Estilos   | Tailwind CSS v4              | Mobile-first y modo oscuro con clases.                                        |
 | Datos     | Dexie (IndexedDB)            | Sin backend, con migraciones de esquema versionadas.                          |
 | PWA       | vite-plugin-pwa (Workbox)    | Caché offline y actualización automática.                                     |
-| Fechas    | date-fns                     | Textos en español y fechas locales.                                           |
+| Fechas    | date-fns + `Intl`            | date-fns para los cálculos; `Intl` para mostrarlas en cada idioma.            |
 | Arrastrar | @dnd-kit/core                | Accesible, con sensores de ratón y táctil.                                    |
 | Tests     | Vitest + Testing Library     | Pruebas de comportamiento, no de implementación.                              |
 | Tests e2e | Playwright                   | El recorrido real en un navegador: arrastrar, offline, idiomas, persistencia. |
