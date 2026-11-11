@@ -62,9 +62,7 @@ test.describe('dragging', () => {
     await expect(page.getByLabel('Regar las plantas')).toBeHidden()
 
     await page.getByRole('button', { name: 'Deshacer' }).click()
-    await page.waitForTimeout(800)
-    // eslint-disable-next-line no-console
-    console.log('DEBUG-MAIN', JSON.stringify(await page.locator('body').innerText()), await page.evaluate(() => new Date().toString()))
+    await expect(page.locator('main')).toContainText('Regar las plantas')
     await expect(page.getByLabel('Regar las plantas')).toBeVisible()
   })
 })
