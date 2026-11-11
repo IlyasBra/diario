@@ -11,7 +11,16 @@ export function AppHeader({ today, actions }: AppHeaderProps) {
   return (
     <header className="sticky top-0 z-10 border-b border-slate-200 bg-white/80 pt-[env(safe-area-inset-top)] backdrop-blur dark:border-slate-800 dark:bg-slate-900/80">
       <div className="mx-auto flex max-w-2xl items-center justify-between gap-4 px-4 py-4">
-        <p className="text-xl font-semibold tracking-tight">Diario</p>
+        <div className="flex items-center gap-2.5">
+          <img
+            src={`${import.meta.env.BASE_URL}favicon.svg`}
+            alt=""
+            width={32}
+            height={32}
+            className="size-8"
+          />
+          <p className="text-xl font-semibold tracking-tight">Diario</p>
+        </div>
         <div className="flex items-center gap-2">
           <p className="text-sm text-slate-600 first-letter:uppercase dark:text-slate-400">
             <time dateTime={today}>{formatLongDate(parseISODate(today))}</time>
