@@ -28,18 +28,20 @@ App web de organización personal: tareas, recordatorios, calendario y estadíst
 
 ## Tecnología y por qué
 
-| Pieza     | Elección                     | Motivo                                                                     |
-| --------- | ---------------------------- | -------------------------------------------------------------------------- |
-| UI        | React 19 + TypeScript        | Tipado estricto, sin `any`.                                                |
-| Build     | Vite                         | Arranque rápido y buen soporte de PWA.                                     |
-| Estilos   | Tailwind CSS v4              | Mobile-first y modo oscuro con clases.                                     |
-| Datos     | Dexie (IndexedDB)            | Sin backend, con migraciones de esquema versionadas.                       |
-| PWA       | vite-plugin-pwa (Workbox)    | Caché offline y actualización automática.                                  |
-| Fechas    | date-fns                     | Textos en español y fechas locales.                                        |
-| Arrastrar | @dnd-kit/core                | Accesible, con sensores de ratón y táctil.                                 |
-| Tests     | Vitest + Testing Library     | Pruebas de comportamiento, no de implementación.                           |
-| Calidad   | ESLint (+jsx-a11y), Prettier | Reglas de accesibilidad en el lint.                                        |
-| CI/CD     | GitHub Actions + Pages       | Formato, lint, tipos, tests y build en cada push; despliegue desde `main`. |
+| Pieza     | Elección                     | Motivo                                                                        |
+| --------- | ---------------------------- | ----------------------------------------------------------------------------- |
+| UI        | React 19 + TypeScript        | Tipado estricto, sin `any`.                                                   |
+| Build     | Vite                         | Arranque rápido y buen soporte de PWA.                                        |
+| Estilos   | Tailwind CSS v4              | Mobile-first y modo oscuro con clases.                                        |
+| Datos     | Dexie (IndexedDB)            | Sin backend, con migraciones de esquema versionadas.                          |
+| PWA       | vite-plugin-pwa (Workbox)    | Caché offline y actualización automática.                                     |
+| Fechas    | date-fns                     | Textos en español y fechas locales.                                           |
+| Arrastrar | @dnd-kit/core                | Accesible, con sensores de ratón y táctil.                                    |
+| Tests     | Vitest + Testing Library     | Pruebas de comportamiento, no de implementación.                              |
+| Tests e2e | Playwright                   | El recorrido real en un navegador: arrastrar, offline, idiomas, persistencia. |
+| Idiomas   | Capa propia (`src/i18n`)     | Sin dependencias; claves tipadas y plurales con `Intl.PluralRules`.           |
+| Calidad   | ESLint (+jsx-a11y), Prettier | Reglas de accesibilidad en el lint.                                           |
+| CI/CD     | GitHub Actions + Pages       | Formato, lint, tipos, tests y build en cada push; despliegue desde `main`.    |
 
 ## Ejecutar en local
 
@@ -62,7 +64,8 @@ Abre http://localhost:5173.
 | `npm run typecheck`     | Comprueba los tipos                   |
 | `npm run lint`          | ESLint sin avisos permitidos          |
 | `npm run format:check`  | Comprueba el formato con Prettier     |
-| `npm test`              | Ejecuta los tests                     |
+| `npm test`              | Tests unitarios y de interfaz         |
+| `npm run e2e`           | Tests end-to-end con Playwright       |
 | `npm run test:coverage` | Tests con cobertura                   |
 
 ## Tests
