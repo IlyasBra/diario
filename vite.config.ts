@@ -27,7 +27,7 @@ export default defineConfig({
         display: 'standalone',
         orientation: 'portrait',
         background_color: '#f8fafc',
-        theme_color: '#4f46e5',
+        theme_color: '#4338ca',
         // start_url and scope default to the configured base path.
         icons: [
           { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
