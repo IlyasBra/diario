@@ -21,6 +21,7 @@ App web de organización personal: tareas, recordatorios, calendario y estadíst
 - **Resumen**: racha actual y mejor racha, completadas por semana y por etiqueta.
 - **Deshacer** al completar, borrar o mover una tarea.
 - **Arrastrar** una tarea a otro día (ratón y táctil, con anuncios para lectores de pantalla).
+- **6 idiomas**: español, inglés, francés, árabe (de derecha a izquierda), italiano y alemán. Usa por defecto el idioma del móvil y se puede cambiar en Ajustes.
 - **Modo oscuro** (sistema, claro u oscuro, sin parpadeo al cargar).
 - **Copia de seguridad** en JSON con versiones, e importación compatible con copias antiguas.
 - **PWA**: instalable, funciona offline y se actualiza sola.
@@ -67,10 +68,23 @@ Abre http://localhost:5173.
 ## Tests
 
 ```bash
-npm test
+npm test            # 204 tests unitarios y de interfaz (Vitest + Testing Library)
+npm run e2e         # 7 tests end-to-end (Playwright, sobre el build de producción)
 ```
 
-Cubren la capa de datos (contrato común para Dexie y memoria, migraciones), la lógica pura (recurrencia, selectores, estadísticas, calendario, arrastre, búsqueda, copias de seguridad) y los flujos de interfaz (crear, editar, completar, deshacer, filtros, ajustes).
+Los primeros cubren la capa de datos (contrato común para Dexie y memoria, migraciones), la lógica pura (recurrencia, selectores, estadísticas, calendario, arrastre, búsqueda, copias de seguridad, idiomas) y los flujos de interfaz. Los e2e comprueban lo que solo se ve en un navegador real: que las tareas sobreviven a una recarga, arrastrar a otro día, deshacer, modo oscuro, detección del idioma (incluido árabe) y uso sin conexión.
+
+La CI ejecuta ambos en cada push y no despliega si alguno falla.
+
+## Calidad medida
+
+Auditoría de Lighthouse sobre el build de producción, en modo móvil:
+
+| Rendimiento | Accesibilidad | Buenas prácticas | SEO |
+| :---------: | :-----------: | :--------------: | :-: |
+|   79–89 ¹   |      100      |       100        | 100 |
+
+¹ Varía entre ejecuciones por el _throttling_ de CPU de móvil. El JavaScript pesa unos 165 KB comprimido.
 
 ## Estructura
 
@@ -81,7 +95,9 @@ src/
   db/           esquema Dexie y migraciones
   features/     tasks, reminders, tags, search, calendar, stats,
                 undo, backup, settings, notifications
+  i18n/         idiomas, traducciones y detección del idioma
   lib/          utilidades y capa de repositorios
+e2e/            tests end-to-end (Playwright)
 ```
 
 Cada _feature_ agrupa sus tipos, lógica pura, estado y componentes.
@@ -94,14 +110,16 @@ Cada _feature_ agrupa sus tipos, lógica pura, estado y componentes.
 - **Recurrencia sin duplicar filas.** Una tarea repetida se guarda una vez; cada aparición se proyecta sobre su día y se completa en `doneDates`. Las mensuales se calculan desde la fecha inicial, ajustando fines de mes (el 31 cae en el 30 o 28), sin encadenar.
 - **Migraciones de Dexie** (v1–v5) con `upgrade`, de modo que los datos existentes se conservan al añadir campos.
 - **Copia de seguridad versionada** (`BACKUP_VERSION`). Se valida todo al importar, se rellenan valores por defecto en copias antiguas y se restaura en orden (etiquetas, tareas, recordatorios). La app pide `storage.persist()` para que el navegador no borre los datos.
+- **Idiomas sin librería.** Los textos viven en un catálogo por idioma; el de español define las claves y los demás deben tenerlas todas (lo comprueba el compilador). Los plurales usan `Intl.PluralRules` (el árabe tiene seis formas), y fechas y listas usan `Intl`, así que no hay formatos escritos a mano. Las etiquetas por defecto se traducen mientras el usuario no las renombre.
+- **Árabe de derecha a izquierda.** Se usan propiedades CSS lógicas (`ms-`, `pe-`, `start-`…) y las flechas se voltean con `rtl:`. `<html lang dir>` se fija antes de pintar.
+- **Idioma del móvil.** Se lee `navigator.languages`: se elige el primero disponible y, si ninguno lo está, inglés. «Automático» sigue al móvil; elegir un idioma lo fija.
 - **Deshacer** con una barra temporal común, en lugar de diálogos de confirmación.
 - **Accesibilidad.** Diálogos nativos `<dialog>`, reglas `jsx-a11y`, etiquetas en todos los controles, y arrastre con anuncios en español. El arrastre es un extra: todo se puede hacer también editando la tarea.
 - **Modo oscuro sin parpadeo.** Un script en línea aplica la clase antes de pintar y actualiza `theme-color`.
 
 ## Próximos pasos
 
-- Tests end-to-end con Playwright en la CI.
-- Auditoría Lighthouse y publicar las puntuaciones.
 - Sincronización opcional entre dispositivos detrás de la misma interfaz de repositorio.
 - Subtareas en tareas repetidas y arrastre de apariciones individuales.
-- Internacionalización (hoy la interfaz está solo en español).
+- Cargar solo el idioma activo (hoy los seis van en el mismo paquete) para recortar peso.
+- Primer día de la semana configurable (hoy siempre lunes).
