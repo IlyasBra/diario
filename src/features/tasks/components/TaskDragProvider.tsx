@@ -3,6 +3,7 @@ import {
   type DragEndEvent,
   DndContext,
   MouseSensor,
+  pointerWithin,
   TouchSensor,
   useDndContext,
   useDroppable,
@@ -77,6 +78,9 @@ export function TaskDragProvider({ today, children }: TaskDragProviderProps) {
   return (
     <DndContext
       sensors={sensors}
+      // The day under the finger or cursor wins; the default compares the dragged
+      // card (as wide as the screen) with the targets and picks one far from the pointer.
+      collisionDetection={pointerWithin}
       onDragEnd={handleDragEnd}
       accessibility={{
         announcements,

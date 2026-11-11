@@ -56,6 +56,8 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
+    // End-to-end tests run with Playwright (see e2e/).
+    include: ['src/**/*.test.{ts,tsx}'],
     restoreMocks: true,
     coverage: {
       include: ['src/**/*.{ts,tsx}'],
