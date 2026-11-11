@@ -40,7 +40,6 @@ test.describe('dragging', () => {
   test.use({ hasTouch: false, isMobile: false, viewport: { width: 390, height: 844 } })
 
   test('a task can be dragged to another day and moved back with undo', async ({ page }) => {
-    page.on('console', (m) => process.stdout.write(`PAGE ${m.text()}\n`))
     await openApp(page)
     await addTask(page, 'Regar las plantas')
 
@@ -62,6 +61,8 @@ test.describe('dragging', () => {
     await expect(page.getByText('Movida a mañana')).toBeVisible()
     await expect(page.getByLabel('Regar las plantas')).toBeHidden()
 
+    // dnd-kit swallows clicks for 50 ms after a drop; no person clicks that fast, a script can.
+    await page.waitForTimeout(150)
     await page.getByRole('button', { name: 'Deshacer' }).click()
     await expect(page.getByLabel('Regar las plantas')).toBeVisible()
   })

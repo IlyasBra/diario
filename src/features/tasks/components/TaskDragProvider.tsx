@@ -50,7 +50,6 @@ export function TaskDragProvider({ today, children }: TaskDragProviderProps) {
   )
 
   function handleDragEnd(event: DragEndEvent) {
-    console.warn('DBG dragEnd', Date.now(), event.over?.id)
     // A drag must move the task once, even if the end event is delivered twice.
     if (handledDrags.current.has(event.activatorEvent)) return
     handledDrags.current.add(event.activatorEvent)
@@ -61,7 +60,6 @@ export function TaskDragProvider({ today, children }: TaskDragProviderProps) {
 
     void updateTask(move.taskId, { date: move.to })
     showUndo(t('task.movedTo', { day: formatDayHeading(move.to, today).toLowerCase() }), () => {
-      console.warn('DBG undo', Date.now())
       void updateTask(move.taskId, { date: move.from })
     })
   }
