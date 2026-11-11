@@ -10,7 +10,7 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core'
-import { type ReactNode } from 'react'
+import { type ReactNode, useRef } from 'react'
 
 import { useUndo } from '@/features/undo/useUndo'
 import { useI18n } from '@/i18n'
@@ -41,6 +41,7 @@ export function TaskDragProvider({ today, children }: TaskDragProviderProps) {
   const { t } = useI18n()
   const { tasks, updateTask } = useTasks()
   const { showUndo } = useUndo()
+  const handledDrags = useRef(new WeakSet<Event>())
   // The handle has touch-action: none, so touch drags start immediately and
   // do not fight with scrolling elsewhere in the list.
   const sensors = useSensors(
@@ -49,6 +50,10 @@ export function TaskDragProvider({ today, children }: TaskDragProviderProps) {
   )
 
   function handleDragEnd(event: DragEndEvent) {
+    // A drag must move the task once, even if the end event is delivered twice.
+    if (handledDrags.current.has(event.activatorEvent)) return
+    handledDrags.current.add(event.activatorEvent)
+
     const target = event.over ? String(event.over.id) : null
     const move = resolveTaskMove(tasks, String(event.active.id), target)
     if (!move) return
