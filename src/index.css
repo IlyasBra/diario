@@ -23,6 +23,14 @@
   html {
     -webkit-text-size-adjust: 100%;
     -webkit-tap-highlight-color: transparent;
+
+    /* Native controls (date and time pickers, scrollbars) follow the app's
+       theme, not the device's, or they can be dark on a light page. */
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
   }
 
   body {
