@@ -4,8 +4,9 @@ import { AppShell } from '@/components/layout/AppShell'
 import { MainNav } from '@/components/layout/MainNav'
 import { Button } from '@/components/ui/Button'
 import { EmptyState } from '@/components/ui/EmptyState'
-import { PlusIcon, SearchIcon, SettingsIcon } from '@/components/ui/icons'
+import { PlusIcon, SearchIcon, SettingsIcon, SparklesIcon } from '@/components/ui/icons'
 import { Notice } from '@/components/ui/Notice'
+import { AssistantView } from '@/features/assistant/components/AssistantView'
 import { CalendarView } from '@/features/calendar/components/CalendarView'
 import { StatsView } from '@/features/stats/components/StatsView'
 import { FilterBar } from '@/features/search/components/FilterBar'
@@ -57,10 +58,13 @@ export function MainScreen({ today, isPersistent }: MainScreenProps) {
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [filter, setFilter] = useState<TaskFilter>(EMPTY_FILTER)
   const [calendarDay, setCalendarDay] = useState(today)
+  const [assistantVisited, setAssistantVisited] = useState(route === 'asistente')
   const theme = useTheme()
   const isStoragePersistent = usePersistentStorage()
 
   useScrollToTopOnRouteChange(route)
+  // Adjusting state while rendering is the supported way to derive it from props.
+  if (route === 'asistente' && !assistantVisited) setAssistantVisited(true)
 
   const status =
     tasks.status === 'error' || reminders.status === 'error' || tags.status === 'error'
@@ -103,6 +107,14 @@ export function MainScreen({ today, isPersistent }: MainScreenProps) {
         nav={<MainNav items={navItems(t)} currentId={route} />}
         headerActions={
           <>
+            <a
+              href="#asistente"
+              aria-current={route === 'asistente' ? 'page' : undefined}
+              className="inline-flex size-11 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+            >
+              <SparklesIcon />
+              <span className="sr-only">{t('header.assistant')}</span>
+            </a>
             <a
               href="#buscar"
               aria-current={route === 'buscar' ? 'page' : undefined}
@@ -188,6 +200,12 @@ export function MainScreen({ today, isPersistent }: MainScreenProps) {
               />
             )}
             {route === 'resumen' && <StatsView today={today} />}
+            {assistantVisited && (
+              // Stays mounted once opened, so the conversation survives changing section.
+              <div hidden={route !== 'asistente'}>
+                <AssistantView today={today} />
+              </div>
+            )}
             {route === 'buscar' && (
               <SearchView today={today} onEditTask={editTask} onEditReminder={editReminder} />
             )}
@@ -199,14 +217,16 @@ export function MainScreen({ today, isPersistent }: MainScreenProps) {
               />
             )}
 
-            <Button
-              variant="primary"
-              onClick={openCreate}
-              className="fixed end-4 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-20 h-14 rounded-full ps-4 pe-5 shadow-lg md:bottom-8"
-            >
-              <PlusIcon />
-              {route === 'recordatorios' ? t('main.newReminder') : t('main.newTask')}
-            </Button>
+            {route !== 'asistente' && (
+              <Button
+                variant="primary"
+                onClick={openCreate}
+                className="fixed end-4 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-20 h-14 rounded-full ps-4 pe-5 shadow-lg md:bottom-8"
+              >
+                <PlusIcon />
+                {route === 'recordatorios' ? t('main.newReminder') : t('main.newTask')}
+              </Button>
+            )}
           </>
         )}
 

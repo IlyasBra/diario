@@ -21,6 +21,7 @@ App web de organización personal: tareas, recordatorios, calendario y estadíst
 - **Resumen**: racha actual y mejor racha, completadas por semana y por etiqueta.
 - **Deshacer** al completar, borrar o mover una tarea.
 - **Arrastrar** una tarea a otro día (ratón y táctil, con anuncios para lectores de pantalla).
+- **Asistente de IA**: el usuario cuenta su día a día en un chat y la IA propone un plan que se añade a la agenda solo cuando él lo acepta. Usa la clave de API del propio usuario (Anthropic).
 - **6 idiomas**: español, inglés, francés, árabe (de derecha a izquierda), italiano y alemán. Usa por defecto el idioma del móvil y se puede cambiar en Ajustes.
 - **Modo oscuro** (sistema, claro u oscuro, sin parpadeo al cargar).
 - **Copia de seguridad** en JSON con versiones, e importación compatible con copias antiguas.
@@ -119,6 +120,8 @@ Cada _feature_ agrupa sus tipos, lógica pura, estado y componentes.
 - **Deshacer** con una barra temporal común, en lugar de diálogos de confirmación.
 - **Accesibilidad.** Diálogos nativos `<dialog>`, reglas `jsx-a11y`, etiquetas en todos los controles, y arrastre con anuncios en español. El arrastre es un extra: todo se puede hacer también editando la tarea.
 - **Modo oscuro sin parpadeo.** Un script en línea aplica la clase antes de pintar y actualiza `theme-color`.
+
+- **IA sin servidor y sin exponer claves.** Una clave de API no puede ir dentro de una web pública, así que cada usuario pega la suya (se guarda solo en su dispositivo) y el navegador llama directamente a la API. Así no hay backend ni costes para el proyecto. El modelo no escribe en la agenda: responde con una llamada a una herramienta (`propose_tasks`) cuyo resultado se valida (fechas, horas, prioridades y etiquetas) y se muestra para que el usuario lo acepte. Su contexto es la agenda de los próximos 14 días. Si algún día hubiera backend, bastaría cambiar `client.ts`.
 
 ## Próximos pasos
 

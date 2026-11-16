@@ -22,6 +22,11 @@ if (!('showModal' in HTMLDialogElement.prototype)) {
   })
 }
 
+// jsdom does not implement scrollIntoView (used by the chat to follow new messages).
+if (typeof Element.prototype.scrollIntoView !== 'function') {
+  Element.prototype.scrollIntoView = () => undefined
+}
+
 // jsdom does not implement matchMedia. Minimal stand-in: nothing ever matches.
 if (typeof window.matchMedia !== 'function') {
   Object.assign(window, {

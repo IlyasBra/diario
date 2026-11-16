@@ -176,3 +176,12 @@ export function GripIcon(props: IconProps) {
     </Icon>
   )
 }
+
+export function SparklesIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z" />
+      <path d="M19 15v4M17 17h4M5 17v3M3.5 18.5h3" />
+    </Icon>
+  )
+}

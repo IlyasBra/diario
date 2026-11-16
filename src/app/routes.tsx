@@ -10,12 +10,13 @@ export const ROUTES = [
   'recordatorios',
   'resumen',
   'buscar',
+  'asistente',
 ] as const
 export type Route = (typeof ROUTES)[number]
 
 export const DEFAULT_ROUTE: Route = 'hoy'
 
-/** Sections shown in the bottom bar. "buscar" is reached from the header. */
+/** Sections shown in the bottom bar. "buscar" and "asistente" are reached from the header. */
 export function navItems(t: (key: MessageKey) => string): NavItem[] {
   return [
     { id: 'hoy', label: t('nav.today'), href: '#hoy', icon: <SunIcon /> },

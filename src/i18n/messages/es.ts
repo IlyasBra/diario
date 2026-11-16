@@ -292,6 +292,38 @@ export const es = {
   'store.tag.update': 'No se ha podido guardar la etiqueta.',
   'store.tag.remove': 'No se ha podido borrar la etiqueta.',
   'store.tag.replace': 'No se han podido restaurar las etiquetas.',
+  'header.assistant': 'Asistente',
+  'assistant.title': 'Asistente',
+  'assistant.intro':
+    'Cuéntame cómo es tu día a día (trabajo, estudios, citas, hábitos, cuándo rindes más) y te propongo cómo organizarlo.',
+  'assistant.placeholder':
+    'Ej.: trabajo de 9 a 17, estudio por las tardes y quiero ir al gimnasio tres veces por semana…',
+  'assistant.inputLabel': 'Tu mensaje',
+  'assistant.send': 'Enviar',
+  'assistant.thinking': 'Pensando…',
+  'assistant.you': 'Tú',
+  'assistant.name': 'Asistente',
+  'assistant.log': 'Conversación',
+  'assistant.setupTitle': 'Conecta tu IA',
+  'assistant.setupBody':
+    'El asistente usa tu propia clave de API de Anthropic. Se guarda solo en este dispositivo. Tus mensajes y tu agenda de los próximos días se envían directamente a Anthropic; Diario no tiene servidor.',
+  'assistant.keyLabel': 'Clave de API',
+  'assistant.keyHelp': 'Puedes crearla en console.anthropic.com.',
+  'assistant.keySave': 'Guardar clave',
+  'assistant.keyInvalid': 'La clave no parece válida: debería empezar por «sk-ant-».',
+  'assistant.removeKey': 'Quitar clave',
+  'assistant.newChat': 'Nueva conversación',
+  'assistant.privacy': 'Tus mensajes y tu agenda próxima se envían a Anthropic con tu clave.',
+  'assistant.planTitle': 'Plan propuesto',
+  'assistant.planOnly': 'Te propongo este plan:',
+  'assistant.addAll_one': 'Añadir {count} tarea',
+  'assistant.addAll_other': 'Añadir {count} tareas',
+  'assistant.added': 'Tareas añadidas a tu agenda.',
+  'assistant.discard': 'Descartar',
+  'assistant.errorAuth': 'El servicio ha rechazado la clave. Revísala o cámbiala.',
+  'assistant.errorRate': 'El servicio está ocupado. Prueba de nuevo en un momento.',
+  'assistant.errorNetwork': 'No hay conexión con el asistente. Revisa tu internet.',
+  'assistant.errorOther': 'El asistente no ha podido responder. Inténtalo otra vez.',
 } as const
 
 export type MessageKey = keyof typeof es
